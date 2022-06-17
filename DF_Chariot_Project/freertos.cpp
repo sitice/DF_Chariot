@@ -106,7 +106,7 @@ void draw(u8g2_t *u8g2)
 
 
 	u8g2_SetFont(u8g2,u8g2_font_unifont_t_symbols);
-	u8g2_DrawStr(u8g2,5, 20, "点");
+	u8g2_DrawStr(u8g2,5, 20, "1");
 
 	
 }
