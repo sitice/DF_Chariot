@@ -11,11 +11,13 @@
 #include "ICM20602.hpp"
 #include "u8g2.h"
 #include "oled.hpp"
+#include "ak8975.hpp"
+#include "spl06.hpp"
 
-
-ICM20602 *icm20602 = nullptr;
-
+ICM20602 icm20602(&hspi1,GPIOD,GPIO_PIN_0);
 OLED oled;
+AK8975 ak8975(&hspi2,GPIOD,GPIO_PIN_7);
+SPL06 spl06(&hspi2,GPIOD,GPIO_PIN_8);
 
 static void GetDataTask(void *pram);
 static void OLEDTask(void *pram);
@@ -63,6 +65,7 @@ void defaultTask(void *param)
 		
 		SPI1Init();
 		SPI2Init();
+		xTaskCreate( GetDataTask ,"1",128,NULL,4,NULL);
 		xTaskCreate( OLEDTask ,"1",128,NULL,4,NULL);
 		vTaskDelete(NULL);
 	}
@@ -71,91 +74,31 @@ void defaultTask(void *param)
 
 static void GetDataTask(void *param)
 {
-	icm20602 = new ICM20602(&hspi1,GPIOD,GPIO_PIN_0);
+	icm20602.Init();
+	ak8975.Init();
+	spl06.Init();
 	for(;;)
 	{
 		vTaskDelay(100);
-		icm20602->Updata();
-		printf("%d\n",icm20602->acc.x);
+		icm20602.Updata();
+		ICM20602::Acc_t acc = icm20602.GetAccVal();
+		ICM20602::Gyro_t gyro = icm20602.GetGyroVal();
+		AK8975::Mag_t mag = ak8975.GetMagVal();
+		SPL06::Baro_t baro = spl06.Updata();
+		printf("%f\n",baro.alti);
 	}
 }
 
 void draw(u8g2_t *u8g2)
 {
-//    u8g2_SetFontMode(u8g2, 1);
-//    u8g2_SetFontDirection(u8g2, 0); 
-//    u8g2_SetFont(u8g2, u8g2_font_inb24_mf); 
-//    u8g2_DrawStr(u8g2, 0, 20, "U");
-//    
-//    u8g2_SetFontDirection(u8g2, 1);
-//    u8g2_SetFont(u8g2, u8g2_font_inb30_mn);
-//    u8g2_DrawStr(u8g2, 21,8,"8");
-//        
-//    u8g2_SetFontDirection(u8g2, 0);
-//    u8g2_SetFont(u8g2, u8g2_font_inb24_mf);
-//    u8g2_DrawStr(u8g2, 51,30,"g");
-//    u8g2_DrawStr(u8g2, 67,30,"\xb2");
-//    
-//    u8g2_DrawHLine(u8g2, 2, 35, 47);
-//    u8g2_DrawHLine(u8g2, 3, 36, 47);
-//    u8g2_DrawVLine(u8g2, 45, 32, 12);
-//    u8g2_DrawVLine(u8g2, 46, 33, 12);
-//  
-//    u8g2_SetFont(u8g2, u8g2_font_4x6_tr);
-//    u8g2_DrawStr(u8g2, 1,54,"github.com/olikraus/u8g2");
-
-
 	u8g2_SetFont(u8g2,u8g2_font_unifont_t_symbols);
 	u8g2_DrawStr(u8g2,5, 20, "1");
-
-	
-}
-uint8_t u8x8_gpio_and_delay_template(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr)
-{
-  switch(msg)
-  {
-    case U8X8_MSG_GPIO_AND_DELAY_INIT:	// called once during init phase of u8g2/u8x8
-      break;							// can be used to setup pins
-    case U8X8_MSG_DELAY_NANO:			// delay arg_int * 1 nano second
-		
-      break;    
-    case U8X8_MSG_DELAY_100NANO:		// delay arg_int * 100 nano seconds
-		__NOP();
-      break;
-    case U8X8_MSG_DELAY_10MICRO:		// delay arg_int * 10 micro seconds
-		for (size_t  n = 0; n < 640; n++)
-		{
-		   __NOP();
-		}
-      break;
-    case U8X8_MSG_DELAY_MILLI:			// delay arg_int * 1 milli second
-		HAL_Delay(arg_int);
-      break;
-    case U8X8_MSG_GPIO_D0:				// D0 or SPI clock pin: Output level in arg_int
-		arg_int?HAL_GPIO_WritePin(GPIOE,GPIO_PIN_4,GPIO_PIN_SET):HAL_GPIO_WritePin(GPIOE,GPIO_PIN_4,GPIO_PIN_RESET);
-    //case U8X8_MSG_GPIO_SPI_CLOCK:
-      break;
-    case U8X8_MSG_GPIO_D1:				// D1 or SPI data pin: Output level in arg_int
-		arg_int?HAL_GPIO_WritePin(GPIOE,GPIO_PIN_3,GPIO_PIN_SET):HAL_GPIO_WritePin(GPIOE,GPIO_PIN_3,GPIO_PIN_RESET);
-    //case U8X8_MSG_GPIO_SPI_DATA:
-      break;
-    case U8X8_MSG_GPIO_CS:				// CS (chip select) pin: Output level in arg_int
-		arg_int?HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_SET):HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_RESET);
-      break;
-    case U8X8_MSG_GPIO_DC:				// DC (data/cmd, A0, register select) pin: Output level in arg_int
-		arg_int?HAL_GPIO_WritePin(GPIOE,GPIO_PIN_1,GPIO_PIN_SET):HAL_GPIO_WritePin(GPIOE,GPIO_PIN_1,GPIO_PIN_RESET);
-      break;
-    case U8X8_MSG_GPIO_RESET:			// Reset pin: Output level in arg_int
-		arg_int?HAL_GPIO_WritePin(GPIOE,GPIO_PIN_2,GPIO_PIN_SET):HAL_GPIO_WritePin(GPIOE,GPIO_PIN_2,GPIO_PIN_RESET);
-      break;
-  }
-  return 1;
 }
 
 static void OLEDTask(void *param)
 {
 	oled.Init();
-	HAL_Delay(1);
+	vTaskDelay(1);
 	u8g2_t u8g2;
 	u8g2_Setup_ssd1306_128x64_noname_f(&u8g2, U8G2_R0, u8x8_byte_4wire_sw_spi, u8x8_gpio_and_delay_template);                                                                       
 	u8g2_SetPowerSave(&u8g2, 0);  

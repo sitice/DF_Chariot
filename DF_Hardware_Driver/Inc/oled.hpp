@@ -4,7 +4,7 @@
 #include "u8g2.h"
 #include "main.h"
 
-uint8_t u8x8_gpio_and_delay(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
+uint8_t u8x8_gpio_and_delay_template(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 
 class OLED
 {
@@ -30,13 +30,8 @@ public:
 	void ShowStrings(u8 x, u8 y, u8 *p);
 	void ShowJPG(uint8_t num,uint8_t **jpg);
 	void ShowNums(u8 x,u8 y,float num);
-	void WriteByte(uint8_t dat, bool cmd);
-	void SetDCPinState(bool);
-	void SetRESPinState(bool);
-	void SetCSPinState(bool);
-	void SetSCKPinState(bool);
 private:
-
+	void WriteByte(uint8_t dat, bool cmd);
 	const bool CMD = 0; 
 	const bool DATA = 1;
 	const uint8_t MAX_X;

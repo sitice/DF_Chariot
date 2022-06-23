@@ -102,37 +102,54 @@ uint8_t zifu[]={
 };
 
 
-
-
 #define delay_ms(x)  HAL_Delay(x)
+
+uint8_t u8x8_gpio_and_delay_template(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr)
+{
+  switch(msg)
+  {
+    case U8X8_MSG_GPIO_AND_DELAY_INIT:	// called once during init phase of u8g2/u8x8
+      break;							// can be used to setup pins
+    case U8X8_MSG_DELAY_NANO:			// delay arg_int * 1 nano second
+		
+      break;    
+    case U8X8_MSG_DELAY_100NANO:		// delay arg_int * 100 nano seconds
+		__NOP();
+      break;
+    case U8X8_MSG_DELAY_10MICRO:		// delay arg_int * 10 micro seconds
+		for (size_t  n = 0; n < 640; n++)
+		{
+		   __NOP();
+		}
+      break;
+    case U8X8_MSG_DELAY_MILLI:			// delay arg_int * 1 milli second
+		vTaskDelay(arg_int);
+      break;
+    case U8X8_MSG_GPIO_D0:				// D0 or SPI clock pin: Output level in arg_int
+		arg_int?HAL_GPIO_WritePin(GPIOE,GPIO_PIN_4,GPIO_PIN_SET):HAL_GPIO_WritePin(GPIOE,GPIO_PIN_4,GPIO_PIN_RESET);
+    //case U8X8_MSG_GPIO_SPI_CLOCK:
+      break;
+    case U8X8_MSG_GPIO_D1:				// D1 or SPI data pin: Output level in arg_int
+		arg_int?HAL_GPIO_WritePin(GPIOE,GPIO_PIN_3,GPIO_PIN_SET):HAL_GPIO_WritePin(GPIOE,GPIO_PIN_3,GPIO_PIN_RESET);
+    //case U8X8_MSG_GPIO_SPI_DATA:
+      break;
+    case U8X8_MSG_GPIO_CS:				// CS (chip select) pin: Output level in arg_int
+		arg_int?HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_SET):HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_RESET);
+      break;
+    case U8X8_MSG_GPIO_DC:				// DC (data/cmd, A0, register select) pin: Output level in arg_int
+		arg_int?HAL_GPIO_WritePin(GPIOE,GPIO_PIN_1,GPIO_PIN_SET):HAL_GPIO_WritePin(GPIOE,GPIO_PIN_1,GPIO_PIN_RESET);
+      break;
+    case U8X8_MSG_GPIO_RESET:			// Reset pin: Output level in arg_int
+		arg_int?HAL_GPIO_WritePin(GPIOE,GPIO_PIN_2,GPIO_PIN_SET):HAL_GPIO_WritePin(GPIOE,GPIO_PIN_2,GPIO_PIN_RESET);
+      break;
+  }
+  return 1;
+}
+
 
 OLED::OLED():MAX_X(128),MAX_Y(64),SIZE(16){}
 
 OLED::OLED(uint8_t maxX,uint8_t maxY,uint8_t size):MAX_X(maxX),MAX_Y(maxY),SIZE(size){}
-
-void OLED::SetDCPinState(bool state)
-{
-	if(state) HAL_GPIO_WritePin(DC_GPIO,DC_Pin,GPIO_PIN_RESET);
-	else HAL_GPIO_WritePin(DC_GPIO,DC_Pin,GPIO_PIN_RESET);
-}
-
-void OLED::SetRESPinState(bool state)
-{
-	if(state) HAL_GPIO_WritePin(RES_GPIO,RES_Pin,GPIO_PIN_RESET);
-	else HAL_GPIO_WritePin(RES_GPIO,RES_Pin,GPIO_PIN_RESET);
-}
-
-void OLED::SetCSPinState(bool state)
-{
-	if(state) HAL_GPIO_WritePin(CS_GPIO,CS_Pin,GPIO_PIN_RESET);
-	else HAL_GPIO_WritePin(CS_GPIO,CS_Pin,GPIO_PIN_RESET);
-}
-
-void OLED::SetSCKPinState(bool state)
-{
-	if(state) HAL_GPIO_WritePin(SCK_GPIO,SCK_Pin,GPIO_PIN_RESET);
-	else HAL_GPIO_WritePin(SCK_GPIO,SCK_Pin,GPIO_PIN_RESET);
-}
 
 void OLED::WriteByte(uint8_t dat, bool cmd)
 {
@@ -282,7 +299,7 @@ void OLED::ShowNum(u8 x,u8 y,u32 num,u8 len,u8 size)
 				continue;
 			}else enshow=1; 
 		}
-	 	 ShowChar(x+(size/2)*t,y,temp+'0'); 
+	 	ShowChar(x+(size/2)*t,y,temp+'0'); 
 	}
 } 
 

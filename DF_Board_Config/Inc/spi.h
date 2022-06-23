@@ -37,6 +37,8 @@ extern SPI_HandleTypeDef hspi2;
 void SPI1Init(void);
 void SPI2Init(void);
 
+void SPI_SetSpeed(SPI_HandleTypeDef* spiHandle , uint8_t SPI_BaudRatePrescaler);
+uint8_t SPI_Write_Read_Byte(SPI_HandleTypeDef* spiHandle , uint8_t data);
 
 #ifdef __cplusplus
 }

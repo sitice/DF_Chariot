@@ -314,7 +314,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>2</Optim>
+            <Optim>4</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -499,7 +499,20 @@
               <FileType>8</FileType>
               <FilePath>..\DF_Hardware_Driver\Src\oled.cpp</FilePath>
             </File>
+            <File>
+              <FileName>spl06.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\DF_Hardware_Driver\Src\spl06.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>ak8975.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\DF_Hardware_Driver\Src\ak8975.cpp</FilePath>
+            </File>
           </Files>
+        </Group>
+        <Group>
+          <GroupName>Control</GroupName>
         </Group>
         <Group>
           <GroupName>DataDeal</GroupName>
@@ -1016,12 +1029,6 @@
               <FilePath>..\FreeRTOS\include\FreeRTOSConfig.h</FilePath>
             </File>
           </Files>
-        </Group>
-        <Group>
-          <GroupName>Control</GroupName>
-        </Group>
-        <Group>
-          <GroupName>fatfs</GroupName>
         </Group>
         <Group>
           <GroupName>u8g2</GroupName>
