@@ -2,32 +2,9 @@
 #define __MOTOR_H__
 
 #include "main.h"
+#include "encoder.h"
 
-#define MOTOR1_A_GPIO GPIOC
-#define MOTOR1_B_GPIO GPIOC
-
-#define MOTOR2_A_GPIO GPIOE
-#define MOTOR2_B_GPIO GPIOE
-
-#define MOTOR3_A_GPIO GPIOE
-#define MOTOR3_B_GPIO GPIOB
-
-#define MOTOR4_A_GPIO GPIOB
-#define MOTOR4_B_GPIO GPIOB
-
-#define MOTOR1_A GPIO_PIN_5
-#define MOTOR1_B GPIO_PIN_4
-
-#define MOTOR2_A GPIO_PIN_10
-#define MOTOR2_B GPIO_PIN_8
-
-#define MOTOR3_A GPIO_PIN_7
-#define MOTOR3_B GPIO_PIN_2
-
-#define MOTOR4_A GPIO_PIN_1
-#define MOTOR4_B GPIO_PIN_0
-
-#define ABS(x) (x)>0?(x):-(x)
+#define ABS(x) (x)>0 ? (x):-(x)
 
 class Motor
 {
@@ -38,13 +15,22 @@ public:
 		Back,
 		Stop
 	};
-	Motor &SetGPIO(GPIO_TypeDef * A_GPIO,uint16_t A_Pin,GPIO_TypeDef * B_GPIO,uint16_t B_Pin);
-	Motor &SetPWMTimerAndChannel(TIM_HandleTypeDef* tim_pwmHandle,uint32_t channel);
-	Motor &SetEncoderTimer(TIM_HandleTypeDef* tim_encoderHandle);
+	Motor & SetGPIO(GPIO_TypeDef * A_GPIO,uint16_t A_Pin,GPIO_TypeDef * B_GPIO,uint16_t B_Pin);
+	Motor & SetPWMTimerAndChannel(TIM_HandleTypeDef* tim_pwmHandle,uint32_t channel);
+	Motor & SetEncoderTimer(TIM_HandleTypeDef* tim_encoderHandle);
 	void Init(void);
 	void SetRpm(int16_t rpm);
 	void SetRpm(Dir_e dir,uint16_t rpm);
-	int16_t GetRpm();
+	int16_t GetRpm(){return GetEncoderValue(_tim_encoderHandle);};
+	
+private:
+	GPIO_TypeDef * _A_GPIO;
+	uint16_t _A_Pin;
+	GPIO_TypeDef * _B_GPIO;
+	uint16_t _B_Pin;
+	TIM_HandleTypeDef* _tim_pwmHandle;
+	uint32_t _channel;
+	TIM_HandleTypeDef* _tim_encoderHandle;
 };
 
 #endif

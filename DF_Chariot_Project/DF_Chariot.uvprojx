@@ -509,6 +509,11 @@
               <FileType>8</FileType>
               <FilePath>..\DF_Hardware_Driver\Src\ak8975.cpp</FilePath>
             </File>
+            <File>
+              <FileName>sd.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\DF_Hardware_Driver\Src\sd.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1257,6 +1262,31 @@
               <FileName>u8x8_u16toa.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\u8g2\csrc\u8x8_u16toa.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>fatfs</GroupName>
+          <Files>
+            <File>
+              <FileName>ff.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\fatfs\source\ff.c</FilePath>
+            </File>
+            <File>
+              <FileName>ffsystem.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\fatfs\source\ffsystem.c</FilePath>
+            </File>
+            <File>
+              <FileName>ffunicode.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\fatfs\source\ffunicode.c</FilePath>
+            </File>
+            <File>
+              <FileName>diskio.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\fatfs\source\diskio.cpp</FilePath>
             </File>
           </Files>
         </Group>

@@ -13,11 +13,15 @@
 #include "oled.hpp"
 #include "ak8975.hpp"
 #include "spl06.hpp"
+#include "Motor.hpp"
+#include "sd.hpp"
 
 ICM20602 icm20602(&hspi1,GPIOD,GPIO_PIN_0);
 OLED oled;
 AK8975 ak8975(&hspi2,GPIOD,GPIO_PIN_7);
 SPL06 spl06(&hspi2,GPIOD,GPIO_PIN_8);
+SD sd(&hspi1,GPIOD,GPIO_PIN_7);
+Motor motors[4];
 
 static void GetDataTask(void *pram);
 static void OLEDTask(void *pram);
@@ -38,27 +42,6 @@ void defaultTask(void *param)
 		TIM1PWMInit();
 		TIM8PWMInit();
 		TIM9PWMInit();
-		HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
-		HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
-		HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_3);
-		HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);
-		HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_1);
-		HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_2);
-		HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_3);
-		HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_4);
-		HAL_TIM_PWM_Start(&htim9,TIM_CHANNEL_1);
-		HAL_TIM_PWM_Start(&htim9,TIM_CHANNEL_2);
-		
-		SetPWM(&htim1,TIM_CHANNEL_1,1000);
-		SetPWM(&htim1,TIM_CHANNEL_2,1000);
-		SetPWM(&htim1,TIM_CHANNEL_3,1000);
-		SetPWM(&htim1,TIM_CHANNEL_4,1000);
-		SetPWM(&htim8,TIM_CHANNEL_1,1000);
-		SetPWM(&htim8,TIM_CHANNEL_2,1000);
-		SetPWM(&htim8,TIM_CHANNEL_3,1000);
-		SetPWM(&htim8,TIM_CHANNEL_4,1000);
-		SetPWM(&htim9,TIM_CHANNEL_1,1000);
-		SetPWM(&htim9,TIM_CHANNEL_2,1000);
 		
 		MX_ADC1_Init();
 		//HAL_ADC_Start_DMA(&hadc1,adc1_val,4);
@@ -107,5 +90,28 @@ static void OLEDTask(void *param)
 		vTaskDelay(12);
 		draw(&u8g2);
 		u8g2_SendBuffer(&u8g2);
+	}
+}
+
+static void MotorTask(void *param)
+{
+	GPIO_TypeDef* motorGPIOs[8]{GPIOC,GPIOC,GPIOE,GPIOE,GPIOE,GPIOB,GPIOB,GPIOB};
+	
+	uint16_t motorPins[8]{GPIO_PIN_5,GPIO_PIN_4,GPIO_PIN_10,GPIO_PIN_8,GPIO_PIN_7,GPIO_PIN_2,GPIO_PIN_1,GPIO_PIN_0};
+	
+	uint32_t channels[4]{TIM_CHANNEL_1,TIM_CHANNEL_2,TIM_CHANNEL_3,TIM_CHANNEL_4};
+	
+	TIM_HandleTypeDef* encoderTimers[4]{&htim2,&htim3,&htim4,&htim5};
+	for(size_t i;i < 4;i++)
+	{
+		motors[i]
+		.SetGPIO(motorGPIOs[i*2],motorPins[i*2],motorGPIOs[i*2+1],motorPins[i*2+1])
+		.SetPWMTimerAndChannel(&htim1,channels[i])
+		.SetEncoderTimer(encoderTimers[i])
+		.Init();
+	}
+	for(;;)
+	{
+		
 	}
 }
