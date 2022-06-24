@@ -39,11 +39,10 @@ DSTATUS disk_status (
 		return stat;
 
 	case DEV_MMC :
-		stat = 0;
 
 		// translate the reslut code here
 
-		return stat;
+		return RES_OK;
 
 	case DEV_USB :
 		//result = USB_disk_status();
@@ -80,7 +79,7 @@ DSTATUS disk_initialize (
 		result = sd.Init();
 		// translate the reslut code here
 
-		return 0;
+	return result == 0?RES_OK:RES_ERROR;
 
 	case DEV_USB :
 		//result = USB_disk_initialize();
@@ -122,10 +121,15 @@ DRESULT disk_read (
 		// translate the arguments here
 
 		result = sd.ReadDisk((uint8_t *)buff, sector, count);
-
+		if(result==0)
+		{
+			return RES_OK;
+		}
+		else
+		{
+			return RES_ERROR;
+		}
 		// translate the reslut code here
-
-		return res;
 
 	case DEV_USB :
 		// translate the arguments here
@@ -172,7 +176,14 @@ DRESULT disk_write (
 		// translate the arguments here
 
 		result = sd.WriteDisk((uint8_t *)buff, sector, count);
-
+		if(result==0)
+		{
+			return RES_OK;
+		}
+		else
+		{
+			return RES_ERROR;
+		}
 		// translate the reslut code here
 
 		return res;
@@ -214,10 +225,8 @@ DRESULT disk_ioctl (
 		return res;
 
 	case DEV_MMC :
-
+		return RES_OK;
 		// Process of the command for the MMC/SD card
-
-		return res;
 
 	case DEV_USB :
 
