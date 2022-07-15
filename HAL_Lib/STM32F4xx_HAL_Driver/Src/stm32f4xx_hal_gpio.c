@@ -172,7 +172,7 @@ void HAL_GPIO_Init(GPIO_TypeDef  *GPIOx, GPIO_InitTypeDef *GPIO_Init)
   assert_param(IS_GPIO_ALL_INSTANCE(GPIOx));
   assert_param(IS_GPIO_PIN(GPIO_Init->Pin));
   assert_param(IS_GPIO_MODE(GPIO_Init->Mode));
-
+	
   /* Configure the port pins */
   for(position = 0U; position < GPIO_NUMBER; position++)
   {

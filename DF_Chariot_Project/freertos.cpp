@@ -15,16 +15,18 @@
 #include "spl06.hpp"
 #include "Motor.hpp"
 #include "sd.hpp"
+#include "DF_Move.hpp"
 
 ICM20602 icm20602(&hspi1,GPIOD,GPIO_PIN_0);
 OLED oled;
 AK8975 ak8975(&hspi2,GPIOD,GPIO_PIN_7);
 SPL06 spl06(&hspi2,GPIOD,GPIO_PIN_8);
 SD sd(&hspi1,GPIOD,GPIO_PIN_7);
-Motor motors[4];
+
 
 static void GetDataTask(void *pram);
 static void OLEDTask(void *pram);
+static void MotorTask(void *param);
 
 void defaultTask(void *param)
 {
@@ -39,7 +41,15 @@ void defaultTask(void *param)
 		USART3Init();
 		TIM6Init();
 		HAL_TIM_Base_Start_IT(&htim6);
-		TIM1PWMInit();
+		__HAL_RCC_GPIOC_CLK_ENABLE();
+		__HAL_RCC_GPIOH_CLK_ENABLE();
+		__HAL_RCC_GPIOB_CLK_ENABLE();
+		__HAL_RCC_GPIOE_CLK_ENABLE();
+		__HAL_RCC_GPIOA_CLK_ENABLE();
+		TIM2EncoderInit();
+		TIM3EncoderInit();
+		TIM4EncoderInit();
+		TIM5EncoderInit();
 		TIM8PWMInit();
 		TIM9PWMInit();
 		
@@ -48,8 +58,9 @@ void defaultTask(void *param)
 		
 		SPI1Init();
 		SPI2Init();
-		xTaskCreate( GetDataTask ,"1",128,NULL,4,NULL);
+		//xTaskCreate( GetDataTask ,"1",128,NULL,4,NULL);
 		xTaskCreate( OLEDTask ,"1",128,NULL,4,NULL);
+		xTaskCreate( MotorTask ,"1",128,NULL,4,NULL);
 		vTaskDelete(NULL);
 	}
 }
@@ -93,25 +104,40 @@ static void OLEDTask(void *param)
 	}
 }
 
+Motor motor1(GPIOC,GPIO_PIN_4,GPIOC,GPIO_PIN_5,&htim1,TIM_CHANNEL_4,&htim2);
+Motor motor2(GPIOE,GPIO_PIN_8,GPIOE,GPIO_PIN_10,&htim1,TIM_CHANNEL_1,&htim5);
+Motor motor3(GPIOB,GPIO_PIN_2,GPIOE,GPIO_PIN_7,&htim1,TIM_CHANNEL_2,&htim4);
+Motor motor4(GPIOB,GPIO_PIN_0,GPIOB,GPIO_PIN_1,&htim1,TIM_CHANNEL_3,&htim3);
+
 static void MotorTask(void *param)
 {
-	GPIO_TypeDef* motorGPIOs[8]{GPIOC,GPIOC,GPIOE,GPIOE,GPIOE,GPIOB,GPIOB,GPIOB};
+	TIM1PWMInit();
+
+	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_3);
 	
-	uint16_t motorPins[8]{GPIO_PIN_5,GPIO_PIN_4,GPIO_PIN_10,GPIO_PIN_8,GPIO_PIN_7,GPIO_PIN_2,GPIO_PIN_1,GPIO_PIN_0};
+	HAL_TIM_Encoder_Start(&htim4,TIM_CHANNEL_ALL);
+
+
+	motor1.Init();
+	motor2.Init();
+	motor3.Init();
+	motor4.Init();
 	
-	uint32_t channels[4]{TIM_CHANNEL_1,TIM_CHANNEL_2,TIM_CHANNEL_3,TIM_CHANNEL_4};
-	
-	TIM_HandleTypeDef* encoderTimers[4]{&htim2,&htim3,&htim4,&htim5};
-	for(size_t i;i < 4;i++)
-	{
-		motors[i]
-		.SetGPIO(motorGPIOs[i*2],motorPins[i*2],motorGPIOs[i*2+1],motorPins[i*2+1])
-		.SetPWMTimerAndChannel(&htim1,channels[i])
-		.SetEncoderTimer(encoderTimers[i])
-		.Init();
-	}
+	Move.motor1 = &motor1;
+	Move.motor2 = &motor2;
+	Move.motor3 = &motor3;
+	Move.motor4 = &motor4;
 	for(;;)
 	{
-		
+		vTaskDelay(100);
+		OmnibearingMove(0,0,500);
+//		motor1.SetRpm(500);
+//		motor2.SetRpm(500);
+//		motor3.SetRpm(0);
+//		motor4.SetRpm(0);
+		printf("1 = %d\n",motor1.GetRpm());
+		printf("2 = %d\n",motor2.GetRpm());
+		printf("3 = %d\n",motor3.GetRpm());
+		printf("4 = %d\n",motor4.GetRpm());
 	}
 }

@@ -514,6 +514,23 @@
         </Group>
         <Group>
           <GroupName>Control</GroupName>
+          <Files>
+            <File>
+              <FileName>DF_Move.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\DF_Control\Src\DF_Move.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>DF_PID.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\DF_Control\Src\DF_PID.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>DF_Display.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\DF_Control\Src\DF_Display.cpp</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>DataDeal</GroupName>

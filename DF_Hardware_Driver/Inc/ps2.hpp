@@ -41,11 +41,11 @@ extern int PS2_KEY;
 //#define WHAMMY_BAR		8
 //These are stick values
 #define PSS_RX 5                //”““°∏ÀX÷· ˝æ›
-#define PSS_RY 6
+#define PSS_RY 6 
 #define PSS_LX 7
 #define PSS_LY 8
 
-extern u8 Data[9];
+extern u8 Data[9];  
 extern u16 MASK[16];
 extern u16 Handkey;
 

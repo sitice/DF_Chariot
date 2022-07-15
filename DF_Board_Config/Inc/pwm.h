@@ -24,7 +24,7 @@ extern "C" {
 
 														
 #define TIM1_PWM_PSR				84 - 1			// 168M / 84 = 2M
-#define TIM1_PWM_ARR				5000 - 1		// 2M / 5000 = 400 Hz 5000 / 2M = 2.5ms
+#define TIM1_PWM_ARR				1000 - 1		// 2M / 5000 = 400 Hz 5000 / 2M = 2.5ms
 
 #define TIM8_PWM_PSR				84 - 1			// 168M / 84 = 2M
 #define TIM8_PWM_ARR				5000 - 1		// 2M / 5000 = 400 Hz 5000 / 2M = 2.5ms

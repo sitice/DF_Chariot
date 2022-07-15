@@ -34,9 +34,9 @@ private:
 	void WriteByte(uint8_t dat, bool cmd);
 	const bool CMD = 0; 
 	const bool DATA = 1;
-	const uint8_t MAX_X;
-	const uint8_t MAX_Y;
-	const uint8_t SIZE;
+	const uint8_t MAX_X = 128;
+	const uint8_t MAX_Y = 8;
+	const uint8_t SIZE = 16;
 	GPIO_TypeDef *CS_GPIO = GPIOE;
 	uint16_t CS_Pin = GPIO_PIN_0;
 	GPIO_TypeDef *DC_GPIO = GPIOE;
