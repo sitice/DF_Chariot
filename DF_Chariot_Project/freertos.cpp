@@ -16,6 +16,7 @@
 #include "Motor.hpp"
 #include "sd.hpp"
 #include "DF_Move.hpp"
+#include "ps2.hpp"
 
 ICM20602 icm20602(&hspi1,GPIOD,GPIO_PIN_0);
 OLED oled;
@@ -58,9 +59,9 @@ void defaultTask(void *param)
 		
 		SPI1Init();
 		SPI2Init();
-		//xTaskCreate( GetDataTask ,"1",128,NULL,4,NULL);
-		xTaskCreate( OLEDTask ,"1",128,NULL,4,NULL);
-		xTaskCreate( MotorTask ,"1",128,NULL,4,NULL);
+		xTaskCreate( GetDataTask ,"GetDataTask",128,NULL,4,NULL);
+//		xTaskCreate( OLEDTask ,"OLEDTask",128,NULL,4,NULL);
+//		xTaskCreate( MotorTask ,"MotorTask",128,NULL,4,NULL);
 		vTaskDelete(NULL);
 	}
 }
@@ -71,22 +72,41 @@ static void GetDataTask(void *param)
 	icm20602.Init();
 	ak8975.Init();
 	spl06.Init();
+//	PS2_Init();
 	for(;;)
 	{
-		vTaskDelay(100);
+		vTaskDelay(300);
 		icm20602.Updata();
 		ICM20602::Acc_t acc = icm20602.GetAccVal();
 		ICM20602::Gyro_t gyro = icm20602.GetGyroVal();
 		AK8975::Mag_t mag = ak8975.GetMagVal();
 		SPL06::Baro_t baro = spl06.Updata();
-		printf("%f\n",baro.alti);
+		
+//		PS2_Receive();
+		
+//		printf("%f  ",PS2_Data.RX_Val);
+//		printf("%f  ",PS2_Data.RY_Val);
+//		printf("%f  ",PS2_Data.LX_Val);
+//		printf("%f  ",PS2_Data.LY_Val);
+//		printf("%d  ",PS2_Data.Key_Val);
+		printf("%d  ",acc.x);
+		printf("%d  ",acc.y);
+		printf("%d  ",acc.z);
+//		printf("%d  ",gyro.x);
+//		     
+//		printf("%d  ",gyro.y);
+//		printf("%d  ",gyro.z);
+		printf("%d  ",mag.x);
+		printf("%d  ",mag.y);
+		printf("%d \n ",mag.z);
+//		printf("%d  \n",(int)(baro.pressure));
 	}
 }
 
 void draw(u8g2_t *u8g2)
 {
 	u8g2_SetFont(u8g2,u8g2_font_unifont_t_symbols);
-	u8g2_DrawStr(u8g2,5, 20, "1");
+	u8g2_DrawStr(u8g2,5, 20, "123");
 }
 
 static void OLEDTask(void *param)
@@ -101,7 +121,10 @@ static void OLEDTask(void *param)
 		vTaskDelay(12);
 		draw(&u8g2);
 		u8g2_SendBuffer(&u8g2);
-	}
+//		oled.ShowChar(0,0,'A');
+
+
+	}  
 }
 
 Motor motor1(GPIOC,GPIO_PIN_4,GPIOC,GPIO_PIN_5,&htim1,TIM_CHANNEL_4,&htim2);
@@ -117,7 +140,6 @@ static void MotorTask(void *param)
 	
 	HAL_TIM_Encoder_Start(&htim4,TIM_CHANNEL_ALL);
 
-
 	motor1.Init();
 	motor2.Init();
 	motor3.Init();
@@ -127,6 +149,7 @@ static void MotorTask(void *param)
 	Move.motor2 = &motor2;
 	Move.motor3 = &motor3;
 	Move.motor4 = &motor4;
+	
 	for(;;)
 	{
 		vTaskDelay(100);
@@ -135,9 +158,9 @@ static void MotorTask(void *param)
 //		motor2.SetRpm(500);
 //		motor3.SetRpm(0);
 //		motor4.SetRpm(0);
-		printf("1 = %d\n",motor1.GetRpm());
-		printf("2 = %d\n",motor2.GetRpm());
-		printf("3 = %d\n",motor3.GetRpm());
-		printf("4 = %d\n",motor4.GetRpm());
+//		printf("1 = %d\n",motor1.GetRpm());
+//		printf("2 = %d\n",motor2.GetRpm());
+//		printf("3 = %d\n",motor3.GetRpm());
+//		printf("4 = %d\n",motor4.GetRpm());
 	}
 }

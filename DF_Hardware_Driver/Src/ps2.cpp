@@ -1,5 +1,7 @@
 #include "ps2.hpp"
 
+PS2 PS2_Data;
+
 void delay_us(uint32_t nus)
 {
     uint32_t Delay = nus * 168/4;
@@ -266,11 +268,18 @@ int PS2_KEY;
 //读取手柄信息
 void PS2_Receive(void)
 {
-
-        PS2_LX=PS2_AnologData(PSS_LX)-128;
-        PS2_LY=PS2_AnologData(PSS_LY)-128;
-        PS2_RX=PS2_AnologData(PSS_RX)-128;
-        PS2_RY=PS2_AnologData(PSS_RY)-128;
-        PS2_KEY=PS2_DataKey(); 	
+	PS2_Data.RX_Val = PS2_AnologData(PSS_RX)-128;
+	PS2_Data.RY_Val = PS2_AnologData(PSS_RY)-128;
+	
+	PS2_Data.LX_Val = PS2_AnologData(PSS_LX)-128;
+	PS2_Data.LY_Val = PS2_AnologData(PSS_LY)-128;
+	
+	PS2_Data.Key_Val = PS2_DataKey(); 	
+	
+//        PS2_LX=PS2_AnologData(PSS_LX)-128;
+//        PS2_LY=PS2_AnologData(PSS_LY)-128;
+//        PS2_RX=PS2_AnologData(PSS_RX)-128;
+//        PS2_RY=PS2_AnologData(PSS_RY)-128;
+//        PS2_KEY=PS2_DataKey(); 	
 
 }

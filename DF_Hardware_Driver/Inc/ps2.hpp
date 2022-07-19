@@ -45,6 +45,19 @@ extern int PS2_KEY;
 #define PSS_LX 7
 #define PSS_LY 8
 
+typedef struct
+{
+	float RX_Val;
+	float RY_Val;
+	
+	float LX_Val;
+	float LY_Val;
+	
+	int Key_Val;
+}PS2;
+
+extern PS2 PS2_Data;
+
 extern u8 Data[9];  
 extern u16 MASK[16];
 extern u16 Handkey;
