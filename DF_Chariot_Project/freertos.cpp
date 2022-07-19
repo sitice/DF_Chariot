@@ -17,12 +17,15 @@
 #include "sd.hpp"
 #include "DF_Move.hpp"
 #include "ps2.hpp"
+#include "DF_Filter.hpp"
+#include "DF_IMU.hpp"
+#include "DF_Communicate.hpp"
 
 ICM20602 icm20602(&hspi1,GPIOD,GPIO_PIN_0);
 OLED oled;
-AK8975 ak8975(&hspi2,GPIOD,GPIO_PIN_7);
-SPL06 spl06(&hspi2,GPIOD,GPIO_PIN_8);
-SD sd(&hspi1,GPIOD,GPIO_PIN_7);
+AK8975 ak8975(&hspi1,GPIOA,GPIO_PIN_4);
+SPL06 spl06(&hspi2,GPIOD,GPIO_PIN_3);
+SD sd(&hspi2,GPIOB,GPIO_PIN_12);
 
 
 static void GetDataTask(void *pram);
@@ -60,7 +63,7 @@ void defaultTask(void *param)
 		SPI1Init();
 		SPI2Init();
 		xTaskCreate( GetDataTask ,"GetDataTask",128,NULL,4,NULL);
-//		xTaskCreate( OLEDTask ,"OLEDTask",128,NULL,4,NULL);
+		xTaskCreate( OLEDTask ,"OLEDTask",128,NULL,4,NULL);
 //		xTaskCreate( MotorTask ,"MotorTask",128,NULL,4,NULL);
 		vTaskDelete(NULL);
 	}
@@ -69,44 +72,69 @@ void defaultTask(void *param)
 
 static void GetDataTask(void *param)
 {
+	
 	icm20602.Init();
 	ak8975.Init();
 	spl06.Init();
-//	PS2_Init();
+
 	for(;;)
 	{
-		vTaskDelay(300);
+		vTaskDelay(10);
+		AK8975::Mag_t mag = ak8975.GetMagVal();
+		SPL06::Baro_t baro = spl06.Updata();
 		icm20602.Updata();
 		ICM20602::Acc_t acc = icm20602.GetAccVal();
 		ICM20602::Gyro_t gyro = icm20602.GetGyroVal();
-		AK8975::Mag_t mag = ak8975.GetMagVal();
-		SPL06::Baro_t baro = spl06.Updata();
 		
-//		PS2_Receive();
+		
+		GROY_IIR_Filter(&gyro,&filter_gyro);
+		ACC_IIR_Filter(&acc, &filter_acc);
+    Get_Radian(&gyro, &SI_gyro);
+		IMUupdate(SI_gyro.x,SI_gyro.y,SI_gyro.z,acc.x,acc.y,acc.z);
+		//Get_Eulerian_Angle(&out_angle);
+		
+//		send_ac_gy_map(acc.x,acc.y,acc.z,SI_gyro.x*100,SI_gyro.y*100,SI_gyro.z*100,
+//		1);
+		sendSenser(out_angle.roll*100, out_angle.pitch*100, out_angle.yaw*100 , 1);
+		
+		
+//		printf("%f  ",(float)(gyro.x*RawData_to_Radian));
+//		printf("%f  ",filter_gyro.x);
+//		printf("%f  ",filter_gyro.y);
+//		printf("%f  ",filter_gyro.z);
+//		
+//		printf("        %f  ",SI_gyro.x);
+//		printf("%f  ",SI_gyro.y);
+//		printf("%f \n ",SI_gyro.z);
+		
+//		printf("%f  ",out_angle.roll);
+//		printf("%f  ",out_angle.pitch);
+//		printf("%f \n ",out_angle.yaw);
 		
 //		printf("%f  ",PS2_Data.RX_Val);
 //		printf("%f  ",PS2_Data.RY_Val);
 //		printf("%f  ",PS2_Data.LX_Val);
 //		printf("%f  ",PS2_Data.LY_Val);
-//		printf("%d  ",PS2_Data.Key_Val);
-		printf("%d  ",acc.x);
-		printf("%d  ",acc.y);
-		printf("%d  ",acc.z);
-//		printf("%d  ",gyro.x);
-//		     
-//		printf("%d  ",gyro.y);
-//		printf("%d  ",gyro.z);
-		printf("%d  ",mag.x);
-		printf("%d  ",mag.y);
-		printf("%d \n ",mag.z);
-//		printf("%d  \n",(int)(baro.pressure));
+//		printf("%d \n ",PS2_Data.Key_Val);
+
+//		printf("%f  ",acc.x);
+//		printf("%f  ",acc.y);
+//		printf("%f  ",acc.z);
+//		printf("%f  ",gyro.x);
+//		printf("%f  ",gyro.y);
+//		printf("%f \n ",gyro.z);
+
+//		printf("%d  ",mag.x);
+//		printf("%d  ",mag.y);
+//		printf("%d  \n",mag.z);
+//		printf("%f  \n",baro.alti);
 	}
 }
 
 void draw(u8g2_t *u8g2)
 {
 	u8g2_SetFont(u8g2,u8g2_font_unifont_t_symbols);
-	u8g2_DrawStr(u8g2,5, 20, "123");
+	u8g2_DrawStr(u8g2,5, 20, "Success");  
 }
 
 static void OLEDTask(void *param)
@@ -115,10 +143,13 @@ static void OLEDTask(void *param)
 	vTaskDelay(1);
 	u8g2_t u8g2;
 	u8g2_Setup_ssd1306_128x64_noname_f(&u8g2, U8G2_R0, u8x8_byte_4wire_sw_spi, u8x8_gpio_and_delay_template);                                                                       
-	u8g2_SetPowerSave(&u8g2, 0);  
+	u8g2_SetPowerSave(&u8g2, 0); 
+
+	PS2_Init();
+	PS2_Receive();
 	for(;;)
 	{
-		vTaskDelay(12);
+		vTaskDelay(300);
 		draw(&u8g2);
 		u8g2_SendBuffer(&u8g2);
 //		oled.ShowChar(0,0,'A');

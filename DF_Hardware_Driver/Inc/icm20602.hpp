@@ -7,15 +7,27 @@ class ICM20602
 public:
 	struct Acc_t //加速度数据结构体
 	{
-		int16_t x;
-		int16_t y;
-		int16_t z;
+		uint16_t x;
+		uint16_t y;
+		uint16_t z;
 	};
 	struct Gyro_t //角速度数据结构体
 	{
-		int16_t x;
-		int16_t y;
-		int16_t z;
+		uint16_t x;
+		uint16_t y;
+		uint16_t z;
+	};
+	struct Acc_f //加速度数据结构体
+	{
+		float x;
+		float y;
+		float z;
+	};
+	struct Gyro_f //角速度数据结构体
+	{
+		float x;
+		float y;
+		float z;
 	};
 private: 
 /* Internal variables -----------------------------------------------------------*/

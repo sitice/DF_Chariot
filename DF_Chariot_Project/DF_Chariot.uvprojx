@@ -134,11 +134,11 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4101</DriverSelection>
+            <DriverSelection>4096</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3></Flash3>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -529,6 +529,21 @@
               <FileName>DF_Display.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\DF_Control\Src\DF_Display.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>DF_Filter.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\DF_Control\Src\DF_Filter.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>DF_IMU.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\DF_Control\Src\DF_IMU.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>DF_Communicate.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\DF_Control\Src\DF_Communicate.cpp</FilePath>
             </File>
           </Files>
         </Group>
