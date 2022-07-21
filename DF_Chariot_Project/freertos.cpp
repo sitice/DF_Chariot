@@ -31,6 +31,7 @@ SD sd(&hspi2,GPIOB,GPIO_PIN_12);
 static void GetDataTask(void *pram);
 static void OLEDTask(void *pram);
 static void MotorTask(void *param);
+static void DebugTask(void *param);
 
 void defaultTask(void *param)
 {
@@ -63,6 +64,7 @@ void defaultTask(void *param)
 		SPI1Init();
 		SPI2Init();
 		xTaskCreate( GetDataTask ,"GetDataTask",128,NULL,4,NULL);
+        xTaskCreate( DebugTask ,"DebugTask",128,NULL,3,NULL);
 		xTaskCreate( OLEDTask ,"OLEDTask",128,NULL,4,NULL);
 //		xTaskCreate( MotorTask ,"MotorTask",128,NULL,4,NULL);
 		vTaskDelete(NULL);
@@ -76,59 +78,67 @@ static void GetDataTask(void *param)
 	icm20602.Init();
 	ak8975.Init();
 	spl06.Init();
+    TickType_t lasttick = xTaskGetTickCount();;
+    TickType_t period = 1/portTICK_RATE_MS; 
 
 	for(;;)
 	{
-		vTaskDelay(10);
 		AK8975::Mag_t mag = ak8975.GetMagVal();
 		SPL06::Baro_t baro = spl06.Updata();
 		icm20602.Updata();
 		ICM20602::Acc_t acc = icm20602.GetAccVal();
 		ICM20602::Gyro_t gyro = icm20602.GetGyroVal();
-		
-		
 		GROY_IIR_Filter(&gyro,&filter_gyro);
 		ACC_IIR_Filter(&acc, &filter_acc);
-    Get_Radian(&gyro, &SI_gyro);
+        Get_Radian(&gyro, &SI_gyro);
 		IMUupdate(SI_gyro.x,SI_gyro.y,SI_gyro.z,acc.x,acc.y,acc.z);
-		//Get_Eulerian_Angle(&out_angle);
-		
-//		send_ac_gy_map(acc.x,acc.y,acc.z,SI_gyro.x*100,SI_gyro.y*100,SI_gyro.z*100,
-//		1);
-		sendSenser(out_angle.roll*100, out_angle.pitch*100, out_angle.yaw*100 , 1);
-		
-		
-//		printf("%f  ",(float)(gyro.x*RawData_to_Radian));
-//		printf("%f  ",filter_gyro.x);
-//		printf("%f  ",filter_gyro.y);
-//		printf("%f  ",filter_gyro.z);
-//		
-//		printf("        %f  ",SI_gyro.x);
-//		printf("%f  ",SI_gyro.y);
-//		printf("%f \n ",SI_gyro.z);
-		
-//		printf("%f  ",out_angle.roll);
-//		printf("%f  ",out_angle.pitch);
-//		printf("%f \n ",out_angle.yaw);
-		
-//		printf("%f  ",PS2_Data.RX_Val);
-//		printf("%f  ",PS2_Data.RY_Val);
-//		printf("%f  ",PS2_Data.LX_Val);
-//		printf("%f  ",PS2_Data.LY_Val);
-//		printf("%d \n ",PS2_Data.Key_Val);
-
-//		printf("%f  ",acc.x);
-//		printf("%f  ",acc.y);
-//		printf("%f  ",acc.z);
-//		printf("%f  ",gyro.x);
-//		printf("%f  ",gyro.y);
-//		printf("%f \n ",gyro.z);
-
-//		printf("%d  ",mag.x);
-//		printf("%d  ",mag.y);
-//		printf("%d  \n",mag.z);
-//		printf("%f  \n",baro.alti);
+		vTaskDelayUntil(&lasttick,period);
 	}
+}
+
+static void DebugTask(void *param)
+{
+    for(;;)
+    {
+        //Get_Eulerian_Angle(&out_angle);
+                
+        //		send_ac_gy_map(acc.x,acc.y,acc.z,SI_gyro.x*100,SI_gyro.y*100,SI_gyro.z*100,
+        //		1);
+                sendSenser(out_angle.roll*100, out_angle.pitch*100, out_angle.yaw*100 , 1);
+                
+                
+        //		printf("%f  ",(float)(gyro.x*RawData_to_Radian));
+        //		printf("%f  ",filter_gyro.x);
+        //		printf("%f  ",filter_gyro.y);
+        //		printf("%f  ",filter_gyro.z);
+        //		
+        //		printf("        %f  ",SI_gyro.x);
+        //		printf("%f  ",SI_gyro.y);
+        //		printf("%f \n ",SI_gyro.z);
+                
+        //		printf("%f  ",out_angle.roll);
+        //		printf("%f  ",out_angle.pitch);
+        //		printf("%f \n ",out_angle.yaw);
+                
+        //		printf("%f  ",PS2_Data.RX_Val);
+        //		printf("%f  ",PS2_Data.RY_Val);
+        //		printf("%f  ",PS2_Data.LX_Val);
+        //		printf("%f  ",PS2_Data.LY_Val);
+        //		printf("%d \n ",PS2_Data.Key_Val);
+
+        //		printf("%f  ",acc.x);
+        //		printf("%f  ",acc.y);
+        //		printf("%f  ",acc.z);
+        //		printf("%f  ",gyro.x);
+        //		printf("%f  ",gyro.y);
+        //		printf("%f \n ",gyro.z);
+
+        //		printf("%d  ",mag.x);
+        //		printf("%d  ",mag.y);
+        //		printf("%d  \n",mag.z);
+        //		printf("%f  \n",baro.alti);
+    }
+
 }
 
 void draw(u8g2_t *u8g2)
