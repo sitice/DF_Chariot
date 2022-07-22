@@ -15,11 +15,11 @@ ICM20602::ICM20602(SPI_HandleTypeDef *hspi,
 	uint16_t GPIOPin) : _hspi(hspi) , _GPIO(GPIO), _GPIOPin(GPIOPin){}
 
 
-//¶ÁĞ´ÅäÖÃ
+//è¯»å†™é…ç½®
 void ICM20602::Write(uint8_t reg,uint8_t data)
 {
-	HAL_GPIO_WritePin(_GPIO,_GPIOPin,GPIO_PIN_RESET);//CSÀ­µÍÔòÎªSPIÄ£Ê½
-	SPI_Write_Read_Byte(_hspi,reg&0x7f);//·¢ËÍ¼Ä´æÆ÷µØÖ·+Ğ´ÃüÁî
+	HAL_GPIO_WritePin(_GPIO,_GPIOPin,GPIO_PIN_RESET);//CSæ‹‰ä½åˆ™ä¸ºSPIæ¨¡å¼
+	SPI_Write_Read_Byte(_hspi,reg&0x7f);//å‘é€å¯„å­˜å™¨åœ°å€+å†™å‘½ä»¤
 	SPI_Write_Read_Byte(_hspi,data);
 	HAL_GPIO_WritePin(_GPIO,_GPIOPin,GPIO_PIN_SET);
 }
@@ -28,7 +28,7 @@ uint8_t ICM20602::Read(uint8_t reg)
 {
 	uint8_t data;
 	HAL_GPIO_WritePin(_GPIO,_GPIOPin,GPIO_PIN_RESET);
-	SPI_Write_Read_Byte(_hspi,reg|0x80);//·¢ËÍ¼Ä´æÆ÷µØÖ·+¶ÁÃüÁî
+	SPI_Write_Read_Byte(_hspi,reg|0x80);//å‘é€å¯„å­˜å™¨åœ°å€+è¯»å‘½ä»¤
 	data = SPI_Write_Read_Byte(_hspi,0xff);
 	HAL_GPIO_WritePin(_GPIO,_GPIOPin,GPIO_PIN_SET);
 	return data;
@@ -37,7 +37,7 @@ uint8_t ICM20602::Read(uint8_t reg)
 void ICM20602::ReadNbyte(uint8_t reg,uint8_t len,uint8_t *buf)
 {
 	HAL_GPIO_WritePin(_GPIO,_GPIOPin,GPIO_PIN_RESET);
-	SPI_Write_Read_Byte(_hspi,reg|0x80);//·¢ËÍ¼Ä´æÆ÷µØÖ·+¶ÁÃüÁî
+	SPI_Write_Read_Byte(_hspi,reg|0x80);//å‘é€å¯„å­˜å™¨åœ°å€+è¯»å‘½ä»¤
 	while(len--)
 		*buf++ = SPI_Write_Read_Byte(_hspi,0xff);
 	HAL_GPIO_WritePin(_GPIO,_GPIOPin,GPIO_PIN_SET);
@@ -49,7 +49,7 @@ void ICM20602::Rest(void)
 	DelayMs(20);
 }
 
-uint8_t ICM20602::Init(void) //³õÊ¼»¯
+uint8_t ICM20602::Init(void) //åˆå§‹åŒ–
 {
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
     GPIO_InitStruct.Pin = _GPIOPin;
@@ -58,40 +58,52 @@ uint8_t ICM20602::Init(void) //³õÊ¼»¯
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(_GPIO, &GPIO_InitStruct);
 	
-	Write(PWR_MGMT_1, 0x80);	//¸´Î»´«¸ĞÆ÷
-	DelayMs(100);//µÈ´ı¸´Î»Íê³É
-	Write(SMPLRT_DIV, 0x00);	//ÍÓÂİÒÇ²ÉÑùÂÊ£¬×î¿ì1kHZ
+	Write(PWR_MGMT_1, 0x80);	//å¤ä½ä¼ æ„Ÿå™¨
+	DelayMs(100);//ç­‰å¾…å¤ä½å®Œæˆ
+	Write(SMPLRT_DIV, 0x00);	//é™€èºä»ªé‡‡æ ·ç‡ï¼Œæœ€å¿«1kHZ
 	DelayMs(10);
-	Write(PWR_MGMT_1, 0x00);	//ÉèÖÃÉè±¸Ê±ÖÓÔ´£¬ÍÓÂİÒÇZÖá  0x01
-	//ĞÂ¼ÓÈëµÄ
-	Write(PWR_MGMT_2, 0x00);//Êä³ö3ÖáÊı¾İ//Ä¬ÈÏÒ²Êä³ö
+	Write(PWR_MGMT_1, 0x00);	//è®¾ç½®è®¾å¤‡æ—¶é’Ÿæºï¼Œé™€èºä»ªZè½´  0x01
+	//æ–°åŠ å…¥çš„
+	Write(PWR_MGMT_2, 0x00);//è¾“å‡º3è½´æ•°æ®//é»˜è®¤ä¹Ÿè¾“å‡º
 	DelayMs(10);
-	Write(CONFIG, 0x04);   //µÍÍ¨ÂË²¨ÆµÂÊ£¬0x03(42Hz) 0x04(20HZ)
+	Write(CONFIG, 0x04);   //ä½é€šæ»¤æ³¢é¢‘ç‡ï¼Œ0x03(42Hz) 0x04(20HZ)
 	DelayMs(10);//
-	//ÉèÖÃÁ¿³Ì
+	//è®¾ç½®é‡ç¨‹
 	Write(GYRO_CONFIG, (3 << 3));//+-2000deg/s 0x1B
 	DelayMs(10);
 	Write(ACCEL_CONFIG, (2 << 3));//+-8G  0x1C
-	//¼ÓËÙ¶È¼ÆÂË²¨ÅäÖÃ 20hz
-	//ĞÂÔö
+	//åŠ é€Ÿåº¦è®¡æ»¤æ³¢é…ç½® 20hz
+	//æ–°å¢
 	Write(ACCEL_CONFIG2,0x04);
-	//Òò¸ÃÉîÈëÑĞ¾¿¾ßÌå¶à¶àÉÙÆµÂÊºÏÊÊ
+	//å› è¯¥æ·±å…¥ç ”ç©¶å…·ä½“å¤šå¤šå°‘é¢‘ç‡åˆé€‚
 	DelayMs(10);
-    //FIFO µçÔ´
-	Write(0x1E, 0x00);//¹Ø±ÕµÍ¹¦ºÄ
+    //FIFO ç”µæº
+	Write(0x1E, 0x00);//å…³é—­ä½åŠŸè€—
 	DelayMs(10);
-	//ĞÂÔö
-	Write(0x23, 0x00);//¹Ø±ÕFIFO DMP½âËã²Å´ò¿ª 
+	//æ–°å¢
+	Write(0x23, 0x00);//å…³é—­FIFO DMPè§£ç®—æ‰æ‰“å¼€ 
     DelayMs(10);
-	if(Read(WHO_AM_I)!= 0x12) //Èç¹ûµØÖ· ²»ÕıÈ·
+	if(Read(WHO_AM_I)!= 0x12) //å¦‚æœåœ°å€ ä¸æ­£ç¡®
 		return 0;
 	return 1;
 }
-//ÏÂÃæÊÇµ¥¶À»ñÈ¡
-#define  Acc_Read() ReadNbyte(0X3B,6,buffer) //¶ÁÈ¡¼ÓËÙ¶È
-#define  Gyro_Read() ReadNbyte(0x43,6,&buffer[6])  //¶ÁÈ¡½ÇËÙ¶È
-void ICM20602::Updata(void) //¶ÁÈ¡Êı¾İ
+//ä¸‹é¢æ˜¯å•ç‹¬è·å–
+#define  Acc_Read() ReadNbyte(0X3B,6,buffer) //è¯»å–åŠ é€Ÿåº¦
+#define  Gyro_Read() ReadNbyte(0x43,6,&buffer[6])  //è¯»å–è§’é€Ÿåº¦
+void ICM20602::Updata(void) //è¯»å–æ•°æ®
 {
+	static nowCailbAccTime = 0;
+	static nowCailbGyroTime = 0;
+	static Acc_f cailbAccSum{
+		.x = 0,
+		.y = 0,
+		.z = 0
+	};
+	static Gyro_f cailbGyroSum{
+		.x = 0,
+		.y = 0,
+		.z = 0
+	};
     uint8_t buffer[14];
     ReadNbyte(ACCEL_XOUT_H,14,buffer);
     acc.x = ((buffer[0] << 8) | buffer[1] );
@@ -100,6 +112,31 @@ void ICM20602::Updata(void) //¶ÁÈ¡Êı¾İ
     gyro.x =((buffer[8] << 8) | buffer[9]) ;
     gyro.y =((buffer[10] << 8)| buffer[11] );
     gyro.z = ((buffer[12] << 8) | buffer[13]);
+	if(isCailbAcc)
+	{
+		cailbAccSum.x += acc.x;
+		cailbAccSum.y += acc.y;
+		cailbAccSum.z += acc.z;
+		nowCailbAccTime++;
+		if(nowCailbAccTime >= calibrationAccTime)
+		{
+			isCailbAcc = false;
+			nowCailbAccTime = 0;
+			
+		}
+	}
+	if(isCailbGyro)
+	{
+		cailbGyroSum.x += gyro.x;
+		cailbGyroSum.y += gyro.y;
+		cailbGyroSum.z += gyro.z;
+		nowCailbGyroTime++;
+		if(nowCailbGyroTime >= calibrationGyroTime)
+		{
+			isCailbGyro = false;
+			nowCailbGyroTime = 0;
+		}
+	}
 }
 
 float ICM20602::GetTemperature(void)

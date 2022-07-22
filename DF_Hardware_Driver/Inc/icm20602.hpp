@@ -5,25 +5,25 @@
 class ICM20602
 {
 public:
-	struct Acc_t //¼ÓËÙ¶ÈÊı¾İ½á¹¹Ìå
+	struct Acc_t //åŠ é€Ÿåº¦æ•°æ®ç»“æ„ä½“
 	{
 		uint16_t x;
 		uint16_t y;
 		uint16_t z;
 	};
-	struct Gyro_t //½ÇËÙ¶ÈÊı¾İ½á¹¹Ìå
+	struct Gyro_t //è§’é€Ÿåº¦æ•°æ®ç»“æ„ä½“
 	{
 		uint16_t x;
 		uint16_t y;
 		uint16_t z;
 	};
-	struct Acc_f //¼ÓËÙ¶ÈÊı¾İ½á¹¹Ìå
+	struct Acc_f //åŠ é€Ÿåº¦æ•°æ®ç»“æ„ä½“
 	{
 		float x;
 		float y;
 		float z;
 	};
-	struct Gyro_f //½ÇËÙ¶ÈÊı¾İ½á¹¹Ìå
+	struct Gyro_f //è§’é€Ÿåº¦æ•°æ®ç»“æ„ä½“
 	{
 		float x;
 		float y;
@@ -36,6 +36,13 @@ private:
 	uint16_t _GPIOPin;
 	Acc_t acc;
 	Gyro_t gyro;
+	uint16_t calibrationAllTime;
+	uint16_t calibrationAccTime;
+	uint16_t calibrationGyroTime;
+	bool isCailbGyro = false;
+	bool isCailbAcc = false;
+	Acc_f calibrationAccData;
+	Gyro_f calibrationGyroData;
 
 /* Internal function -----------------------------------------------------------*/
 	void Write(uint8_t reg,uint8_t data);
@@ -45,23 +52,23 @@ private:
 
 /* register address -----------------------------------------------------------*/
 	/********************************************
-	*¸´Î»ºóËùÓĞ¼Ä´æÆ÷µØÖ·¶¼Îª0£¬³ıÁË
+	*å¤ä½åæ‰€æœ‰å¯„å­˜å™¨åœ°å€éƒ½ä¸º0ï¼Œé™¤äº†
 	*register 26  CONFIG				 =  0x80
 	*register 107 Power Management 1 	 =  0x41
 	*register 117 WHO_AM_I 				 =  0x12
 	*********************************************/
-	//ÍÓÂİÒÇÎÂ¶È²¹³¥
+	//é™€èºä»ªæ¸©åº¦è¡¥å¿
 	const uint8_t XG_OFFS_TC_H = 0x04;
 	const uint8_t XG_OFFS_TC_L = 0x05;
 	const uint8_t YG_OFFS_TC_H = 0x07;
 	const uint8_t YG_OFFS_TC_L = 0x08;
 	const uint8_t ZG_OFFS_TC_H = 0x0A;
 	const uint8_t ZG_OFFS_TC_L = 0x0B;
-	//¼ÓËÙ¶È×Ô¼ìÊä³ö(³ö²úÊ±ÉèÖÃ£¬ÓÃÓÚÓëÓÃ»§µÄ×Ô¼ìÊä³öÖµ±È½Ï£©
+	//åŠ é€Ÿåº¦è‡ªæ£€è¾“å‡º(å‡ºäº§æ—¶è®¾ç½®ï¼Œç”¨äºä¸ç”¨æˆ·çš„è‡ªæ£€è¾“å‡ºå€¼æ¯”è¾ƒï¼‰
 	const uint8_t SELF_TEST_X_ACCEL = 0x0D;
 	const uint8_t SELF_TEST_Y_ACCEL = 0x0E;
 	const uint8_t SELF_TEST_Z_ACCEL = 0x0F;
-	//ÍÓÂİÒÇ¾²Ì¬Æ«ÒÆ
+	//é™€èºä»ªé™æ€åç§»
 	const uint8_t XG_OFFS_USRH = 0x13;
 	const uint8_t XG_OFFS_USRL = 0x14;
 	const uint8_t YG_OFFS_USRH = 0x15;
@@ -69,14 +76,14 @@ private:
 	const uint8_t ZG_OFFS_USRH = 0x17;
 	const uint8_t ZG_OFFS_USRL = 0x18;
 
-	const uint8_t SMPLRT_DIV = 0x19;//ÍÓÂİÒÇ²ÉÑùÂÊ£¬µäĞÍÖµ£º0x07(125Hz)
+	const uint8_t SMPLRT_DIV = 0x19;//é™€èºä»ªé‡‡æ ·ç‡ï¼Œå…¸å‹å€¼ï¼š0x07(125Hz)
 	const uint8_t CONFIG = 0x1A;
 	const uint8_t GYRO_CONFIG = 0x1B;
 	const uint8_t ACCEL_CONFIG = 0x1C;
 	const uint8_t ACCEL_CONFIG2 = 0x1D;
 	const uint8_t LP_MODE_CFG = 0x1E;
 
-	//ÔË¶¯»½ĞÑ¼ÓËÙ¶ÈãĞÖµ
+	//è¿åŠ¨å”¤é†’åŠ é€Ÿåº¦é˜ˆå€¼
 	const uint8_t ACCEL_WOM_X_THR = 0x20;
 	const uint8_t ACCEL_WOM_Y_THR = 0x21;
 	const uint8_t ACCEL_WOM_Z_THR = 0x22;
@@ -89,24 +96,24 @@ private:
 	const uint8_t FIFO_WM_INT_STATUS = 0x39;
 	const uint8_t INT_STATUS = 0x3A;
 
-	//¼ÓËÙ¶ÈÊä³ö
+	//åŠ é€Ÿåº¦è¾“å‡º
 	const uint8_t ACCEL_XOUT_H = 0x3B;
 	const uint8_t ACCEL_XOUT_L = 0x3C;
 	const uint8_t ACCEL_YOUT_H = 0x3D;
 	const uint8_t ACCEL_YOUT_L = 0x3E;
 	const uint8_t ACCEL_ZOUT_H = 0x3F;
 	const uint8_t ACCEL_ZOUT_L = 0x40;
-	//ÎÂ¶ÈÊä³ö
+	//æ¸©åº¦è¾“å‡º
 	const uint8_t TEMP_OUT_H = 0x41;
 	const uint8_t TEMP_OUT_L = 0x42;
-	//½ÇËÙ¶ÈÊä³ö
+	//è§’é€Ÿåº¦è¾“å‡º
 	const uint8_t GYRO_XOUT_H = 0x43;
 	const uint8_t GYRO_XOUT_L = 0x44;
 	const uint8_t GYRO_YOUT_H = 0x45;
 	const uint8_t GYRO_YOUT_L = 0x46;
 	const uint8_t GYRO_ZOUT_H = 0x47;
 	const uint8_t GYRO_ZOUT_L = 0x48;
-	//ÍÓÂİÒÇ×Ô¼ìÊä³ö
+	//é™€èºä»ªè‡ªæ£€è¾“å‡º
 	const uint8_t SELF_TEST_X_GYRO = 0x50;
 	const uint8_t SELF_TEST_Y_GYRO = 0x51;
 	const uint8_t SELF_TEST_Z_GYRO = 0x52;
@@ -116,8 +123,8 @@ private:
 	const uint8_t SIGNAL_PATH_RESET = 0x68;
 	const uint8_t ACCEL_INTEL_CTRL = 0x69;
 	const uint8_t USER_CTRL = 0x6A;
-	//µçÔ´¿ØÖÆ
-	const uint8_t PWR_MGMT_1 = 0x6B; //µçÔ´¹ÜÀí£¬µäĞÍÖµ£º0x00(Õı³£ÆôÓÃ)
+	//ç”µæºæ§åˆ¶
+	const uint8_t PWR_MGMT_1 = 0x6B; //ç”µæºç®¡ç†ï¼Œå…¸å‹å€¼ï¼š0x00(æ­£å¸¸å¯ç”¨)
 	const uint8_t PWR_MGMT_2 = 0x6C;
 
 	const uint8_t I2C_IF = 0x70;
@@ -126,7 +133,7 @@ private:
 	const uint8_t FIFO_R_W = 0x74;
 
 	const uint8_t	WHO_AM_I = 0x75;
-	//¼ÓËÙ¶È¾²Ì¬Æ«ÒÆ
+	//åŠ é€Ÿåº¦é™æ€åç§»
 	const uint8_t XA_OFFSET_H = 0x77;
 	const uint8_t XA_OFFSET_L = 0x78;
 	const uint8_t YA_OFFSET_H = 0x7A;
@@ -137,53 +144,92 @@ private:
 
 public:
 /**
-  * @brief ¹¹Ôìº¯Êı
-  * @param hspi spi¾ä±ú
-  * @param CS_GPIO Æ¬Ñ¡GPIO
-  * @param CS_Pin Æ¬Ñ¡Òı½Å
+  * @brief æ„é€ å‡½æ•°
+  * @param hspi spiå¥æŸ„
+  * @param CS_GPIO ç‰‡é€‰GPIO
+  * @param CS_Pin ç‰‡é€‰å¼•è„š
   * @retval none
   */
 	ICM20602(SPI_HandleTypeDef *hspi,
 	GPIO_TypeDef *GPIO,
 	uint16_t GPIOPin);
 /**
-  * @brief ³õÊ¼»¯º¯Êı
+  * @brief åˆå§‹åŒ–å‡½æ•°
   * @param none
-  * @retval ·µ»Ø0³õÊ¼»¯Ê§°Ü£¬·µ»Ø1³õÊ¼»¯³É¹¦
+  * @retval è¿”å›0åˆå§‹åŒ–å¤±è´¥ï¼Œè¿”å›1åˆå§‹åŒ–æˆåŠŸ
   */
 	uint8_t Init(void);
 /**
-  * @brief ¸´Î»
+  * @brief å¤ä½
   * @param none
-  * @retval ·µ»Ø0³õÊ¼»¯Ê§°Ü£¬·µ»Ø1³õÊ¼»¯³É¹¦
+  * @retval è¿”å›0åˆå§‹åŒ–å¤±è´¥ï¼Œè¿”å›1åˆå§‹åŒ–æˆåŠŸ
   */
 	void Rest(void);
 /**
-  * @brief ¸üĞÂÊı¾İ
+  * @brief æ›´æ–°æ•°æ®
   * @param none
   * @retval none
   */
 	void Updata(void);
 /**
-  * @brief »ñÈ¡ÎÂ¶È
+  * @brief è·å–æ¸©åº¦
   * @param none
   * @retval none
   */
 	float GetTemperature(void);
 /**
-  * @brief µÃµ½¼ÓËÙ¶ÈÊı¾İ
-  * @note ĞèÒªÏÈÖ´ĞĞUpdataº¯Êı»ñÈ¡×îĞÂµÄÊı¾İ
+  * @brief å¾—åˆ°åŠ é€Ÿåº¦æ•°æ®
+  * @note éœ€è¦å…ˆæ‰§è¡ŒUpdataå‡½æ•°è·å–æœ€æ–°çš„æ•°æ®
   * @param none
-  * @retval ¼ÓËÙ¶È
+  * @retval åŠ é€Ÿåº¦
   */
 	Acc_t GetAccVal(){return acc;};
 /**
-  * @brief µÃµ½½ÇËÙ¶ÈÊı¾İ
-  * @note ĞèÒªÏÈÖ´ĞĞUpdataº¯Êı»ñÈ¡×îĞÂµÄÊı¾İ
+  * @brief å¾—åˆ°è§’é€Ÿåº¦æ•°æ®
+  * @note éœ€è¦å…ˆæ‰§è¡ŒUpdataå‡½æ•°è·å–æœ€æ–°çš„æ•°æ®
   * @param none
-  * @retval ½ÇËÙ¶È
+  * @retval è§’é€Ÿåº¦
   */
 	Gyro_t GetGyroVal(){return gyro;};
+/**
+  * @brief æ ¡å‡†æ‰€æœ‰ä¼ æ„Ÿå™¨
+  * @note åœ¨updataå†…è·å–æ•°æ®ï¼Œé»˜è®¤1000æ¬¡
+  * @param time è·å–æ•°æ®æ¬¡æ•°
+  * @retval none
+  */
+	void CalibrationAll(uint16_t time = 1000)
+	{
+		calibrationAllTime = time;
+		isCailbAcc = true;
+		isCailbGyro = true;
+	}
+/**
+  * @brief æ ¡å‡†é™€èºä»ª
+  * @note åœ¨updataå†…è·å–æ•°æ®ï¼Œé»˜è®¤1000æ¬¡
+  * @param time è·å–æ•°æ®æ¬¡æ•°
+  * @retval none
+  */
+	void CalibrationGyro(uint16_t time = 1000)
+	{
+		calibrationGyroTime = time;
+		isCailbGyro = true;
+	}
+/**
+  * @brief æ ¡å‡†åŠ é€Ÿåº¦è®¡
+  * @note åœ¨updataå†…è·å–æ•°æ®ï¼Œé»˜è®¤1000æ¬¡
+  * @param time è·å–æ•°æ®æ¬¡æ•°
+  * @retval none
+  */
+	void CalibrationAcc(uint16_t time = 1000)
+	{
+		calibrationAccTime = time;
+		isCailbAcc = true;
+	}
+
+	Gyro_f GetCalibrationGyroData(){return calibrationGyroData;}
+	Acc_f GetCalibrationAccData(){return calibrationAccData;}
+	void SetCalibrationGyroData(Gyro_f &data){calibrationGyroData = data;}
+	void SetCalibrationAccData(Acc_f &data){calibrationAccData = data;}
 };
 
 #endif
