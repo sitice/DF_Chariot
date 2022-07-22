@@ -34,6 +34,12 @@ extern "C" {
 #define UART4_BAUD		115200
 #define UART5_BAUD		115200
 
+#define UART1_RX_LENGTH 128
+#define UART2_RX_LENGTH 128
+#define UART3_RX_LENGTH 128
+#define UART4_RX_LENGTH 128
+#define UART5_RX_LENGTH 128
+	
 #define USART1_TX_GPIO	GPIOA
 #define USART1_TX_CLK_ENABLE()     __HAL_RCC_GPIOA_CLK_ENABLE();
 #define USART1_TX_PIN	GPIO_PIN_9
@@ -80,6 +86,20 @@ extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 
 extern UART_HandleTypeDef huart5;
+
+typedef struct{
+	UART_HandleTypeDef* uart;
+	uint8_t *dataAddr;
+	uint16_t dataLength;
+	uint16_t index;
+	uint16_t lastIndex;
+}UARTInfo_t;
+
+inline void UART1_SendData(uint8_t *data,uint16_t length);
+inline void UART2_SendData(uint8_t *data,uint16_t length);
+inline void UART3_SendData(uint8_t *data,uint16_t length);
+inline void UART4_SendData(uint8_t *data,uint16_t length);
+inline void UART5_SendData(uint8_t *data,uint16_t length);
 
 void UART4Init(void);
 void UART5Init(void);

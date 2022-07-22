@@ -92,51 +92,62 @@ uint8_t ICM20602::Init(void) //初始化
 #define  Gyro_Read() ReadNbyte(0x43,6,&buffer[6])  //读取角速度
 void ICM20602::Updata(void) //读取数据
 {
-	static nowCailbAccTime = 0;
-	static nowCailbGyroTime = 0;
-	static Acc_f cailbAccSum{
+	static uint16_t nowCailbAccTime = 0;
+	static uint16_t nowCailbGyroTime = 0;
+	static AccOrigin_t cailbAccSum{
 		.x = 0,
 		.y = 0,
 		.z = 0
 	};
-	static Gyro_f cailbGyroSum{
+	static GyroOrigin_t cailbGyroSum{
 		.x = 0,
 		.y = 0,
 		.z = 0
 	};
     uint8_t buffer[14];
     ReadNbyte(ACCEL_XOUT_H,14,buffer);
-    acc.x = ((buffer[0] << 8) | buffer[1] );
-    acc.y = ((buffer[2] << 8) | buffer[3] );
-    acc.z = ((buffer[4] << 8) | buffer[5] );
-    gyro.x =((buffer[8] << 8) | buffer[9]) ;
-    gyro.y =((buffer[10] << 8)| buffer[11] );
-    gyro.z = ((buffer[12] << 8) | buffer[13]);
+    originAcc.x = ((buffer[0] << 8) | buffer[1] );
+    originAcc.y = ((buffer[2] << 8) | buffer[3] );
+    originAcc.z = ((buffer[4] << 8) | buffer[5] );
+    originGyro.x =((buffer[8] << 8) | buffer[9]) ;
+    originGyro.y =((buffer[10] << 8)| buffer[11] );
+    originGyro.z = ((buffer[12] << 8) | buffer[13]);
 	if(isCailbAcc)
 	{
-		cailbAccSum.x += acc.x;
-		cailbAccSum.y += acc.y;
-		cailbAccSum.z += acc.z;
+		cailbAccSum.x += originAcc.x;
+		cailbAccSum.y += originAcc.y;
+		cailbAccSum.z += originAcc.z;
 		nowCailbAccTime++;
 		if(nowCailbAccTime >= calibrationAccTime)
 		{
 			isCailbAcc = false;
 			nowCailbAccTime = 0;
-			
+			calibrationAccData.x = cailbAccSum.x / 1000.0f;
+			calibrationAccData.y = cailbAccSum.y / 1000.0f;
+			calibrationAccData.z = cailbAccSum.z / 1000.0f;
 		}
 	}
 	if(isCailbGyro)
 	{
-		cailbGyroSum.x += gyro.x;
-		cailbGyroSum.y += gyro.y;
-		cailbGyroSum.z += gyro.z;
+		cailbGyroSum.x += originGyro.x;
+		cailbGyroSum.y += originGyro.y;
+		cailbGyroSum.z += originGyro.z;
 		nowCailbGyroTime++;
 		if(nowCailbGyroTime >= calibrationGyroTime)
 		{
 			isCailbGyro = false;
 			nowCailbGyroTime = 0;
+			calibrationGyroData.x = cailbGyroSum.x / 1000.0f;
+			calibrationGyroData.y = cailbGyroSum.y / 1000.0f;
+			calibrationGyroData.z = cailbGyroSum.z / 1000.0f;
 		}
 	}
+	acc.x = originAcc.x - calibrationAccData.x;
+    acc.y = originAcc.y - calibrationAccData.y;
+    acc.z = originAcc.z - calibrationAccData.z + 4096;
+    gyro.x = gyro.x - calibrationGyroData.x;
+    gyro.y = gyro.y - calibrationGyroData.y;
+    gyro.z = gyro.z - calibrationGyroData.z;
 }
 
 float ICM20602::GetTemperature(void)

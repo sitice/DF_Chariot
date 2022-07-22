@@ -2,22 +2,18 @@
 #define __DF_IMU_H
 
 #include "main.h"
+#include "icm20602.hpp"
 
-#define MIN(a, b) 	(((a) < (b)) ? (a) : (b))
-#define MAX(a, b) 	(((a) > (b)) ? (a) : (b))
-#define M_PIf       3.14159265358979323846f
 
-struct _out_angle
+struct EulerAngle_t
 {
 	float yaw;
 	float roll;
 	float pitch;
 };
 
-extern struct _out_angle out_angle;
 
-void Get_Eulerian_Angle( struct _out_angle *angle);//所得的只是 pitch roll
-void IMUupdate(float gx, float gy, float gz, float ax, float ay, float az) ;
+EulerAngle_t IMUupdate(ICM20602::Acc_t &acc,ICM20602::Gyro_t &gyro); 
 float invSqrt(float x);// 快速计算开根号的倒数
 #endif
 

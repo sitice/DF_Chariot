@@ -1,29 +1,32 @@
 #ifndef __ICM20602_HPP__
 #define __ICM20602_HPP__
 
+#define RAWDATA_TO_ANGLE	0.0610351f
+#define RAWDATA_TO_RADIAN	0.0010653f
+
 #include "main.h"
 class ICM20602
 {
 public:
+	struct AccOrigin_t //加速度数据结构体
+	{
+		uint16_t x;
+		uint16_t y;
+		uint16_t z;
+	};
+	struct GyroOrigin_t //角速度数据结构体
+	{
+		uint16_t x;
+		uint16_t y;
+		uint16_t z;
+	};
 	struct Acc_t //加速度数据结构体
-	{
-		uint16_t x;
-		uint16_t y;
-		uint16_t z;
-	};
-	struct Gyro_t //角速度数据结构体
-	{
-		uint16_t x;
-		uint16_t y;
-		uint16_t z;
-	};
-	struct Acc_f //加速度数据结构体
 	{
 		float x;
 		float y;
 		float z;
 	};
-	struct Gyro_f //角速度数据结构体
+	struct Gyro_t //角速度数据结构体
 	{
 		float x;
 		float y;
@@ -34,6 +37,8 @@ private:
 	SPI_HandleTypeDef *_hspi;
 	GPIO_TypeDef *_GPIO;
 	uint16_t _GPIOPin;
+	AccOrigin_t originAcc;
+	GyroOrigin_t originGyro;
 	Acc_t acc;
 	Gyro_t gyro;
 	uint16_t calibrationAllTime;
@@ -41,8 +46,8 @@ private:
 	uint16_t calibrationGyroTime;
 	bool isCailbGyro = false;
 	bool isCailbAcc = false;
-	Acc_f calibrationAccData;
-	Gyro_f calibrationGyroData;
+	Acc_t calibrationAccData;
+	Gyro_t calibrationGyroData;
 
 /* Internal function -----------------------------------------------------------*/
 	void Write(uint8_t reg,uint8_t data);
@@ -178,19 +183,33 @@ public:
   */
 	float GetTemperature(void);
 /**
-  * @brief 得到加速度数据
+  * @brief 得到原始加速度数据
+  * @note 需要先执行Updata函数获取最新的数据
+  * @param none
+  * @retval 加速度
+  */
+	AccOrigin_t GetOriginAccVal(){return originAcc;};
+/**
+  * @brief 得到原始角速度数据
+  * @note 需要先执行Updata函数获取最新的数据
+  * @param none
+  * @retval 角速度
+  */
+	Gyro_t GetGyroVal(){return gyro;};
+/**
+  * @brief 得到校准后加速度数据
   * @note 需要先执行Updata函数获取最新的数据
   * @param none
   * @retval 加速度
   */
 	Acc_t GetAccVal(){return acc;};
 /**
-  * @brief 得到角速度数据
+  * @brief 得到校准后角速度数据
   * @note 需要先执行Updata函数获取最新的数据
   * @param none
   * @retval 角速度
   */
-	Gyro_t GetGyroVal(){return gyro;};
+	GyroOrigin_t GetOrgionGyroVal(){return originGyro;};
 /**
   * @brief 校准所有传感器
   * @note 在updata内获取数据，默认1000次
@@ -225,11 +244,41 @@ public:
 		calibrationAccTime = time;
 		isCailbAcc = true;
 	}
+/**
+  * @brief 得到角速度
+  * @note 需要先执行Updata函数获取最新的数据，单位弧度
+  * @retval 陀螺仪数据
+  */
+	Gyro_t GetRadian(void)
+	{
+		Gyro_t gyro_;
+		gyro_.x = gyro.x * RAWDATA_TO_RADIAN;
+		gyro_.y = gyro.y * RAWDATA_TO_RADIAN;
+		gyro_.z = gyro.z * RAWDATA_TO_RADIAN;
+		return gyro_;
+	}
 
-	Gyro_f GetCalibrationGyroData(){return calibrationGyroData;}
-	Acc_f GetCalibrationAccData(){return calibrationAccData;}
-	void SetCalibrationGyroData(Gyro_f &data){calibrationGyroData = data;}
-	void SetCalibrationAccData(Acc_f &data){calibrationAccData = data;}
+/**
+  * @brief 得到陀螺仪校准数据
+  * @retval 校准数据
+  */
+	Gyro_t GetCalibrationGyroData(){return calibrationGyroData;}
+
+/**
+  * @brief 得到加速度校准数据
+  * @retval 校准数据
+  */
+	Acc_t GetCalibrationAccData(){return calibrationAccData;}
+/**
+  * @brief 设置陀螺仪校准数据
+  * @retval none
+  */
+	void SetCalibrationGyroData(Gyro_t &data){calibrationGyroData = data;}
+/**
+  * @brief 设置加速度校准数据
+  * @retval none
+  */
+	void SetCalibrationAccData(Acc_t &data){calibrationAccData = data;}
 };
 
 #endif

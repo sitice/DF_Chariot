@@ -5,9 +5,6 @@ uint8_t DataTOSend[40];
 
 void PrintHexU8(uint8_t data)
 {
-//	USART1->DR = data;
-//	while ((USART1->SR & 0X40) == 0);
-	//HAL_UART_Transmit(UART_HandleTypeDef *huart, const uint8_t *pData, uint16_t Size, uint32_t Timeout)
 	HAL_UART_Transmit(&huart1,&data,1,0xffff);
 }
 
@@ -15,7 +12,7 @@ void PrintHexU8(uint8_t data)
 void sendSenser(s16 a_x, s16 a_y, s16 a_z, u8 _fu)
 {
     u8 _cnt = 0;
-
+	
     DataTOSend[_cnt++] = 0xAA;
     DataTOSend[_cnt++] = 0xFF;
     DataTOSend[_cnt++] = 0x03;

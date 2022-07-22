@@ -4,7 +4,8 @@
 #include "main.h"
 #include "motor.hpp"
 
-typedef struct
+//结构体命名……
+struct Move_t
 {
 	Motor* motor1;
 	Motor* motor2;
@@ -13,13 +14,14 @@ typedef struct
 	
 	struct 
 	{
-		float X;
-		float Y;
-	}Distance;
+		float x;
+		float y;
+	}Distance_t;
 	
-}MOVE;
+};
 
 extern MOVE Move;
+
 void OmnibearingMove(uint16_t x,uint16_t y,uint16_t z);
 #endif
 

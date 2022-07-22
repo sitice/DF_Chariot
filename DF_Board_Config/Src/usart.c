@@ -1,12 +1,21 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
 #include "stdio.h"
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "semphr.h"
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart5;
+
+SemaphoreHandle_t uart1Semaphore;
+SemaphoreHandle_t uart2Semaphore;
+SemaphoreHandle_t uart3Semaphore;
+SemaphoreHandle_t uart4Semaphore;
+SemaphoreHandle_t uart5Semaphore;
 
 DMA_HandleTypeDef hdma_usart1_rx;
 DMA_HandleTypeDef hdma_usart1_tx;
@@ -19,6 +28,39 @@ DMA_HandleTypeDef hdma_uart4_tx;
 DMA_HandleTypeDef hdma_uart5_rx;
 DMA_HandleTypeDef hdma_uart5_tx;
 
+uint8_t uart1RxTempData[UART1_RX_LENGTH];
+uint8_t uart2RxTempData[UART2_RX_LENGTH];
+uint8_t uart3RxTempData[UART3_RX_LENGTH];
+uint8_t uart4RxTempData[UART4_RX_LENGTH];
+uint8_t uart5RxTempData[UART5_RX_LENGTH];
+
+UARTInfo_t uart1Info = {
+	.dataAddr = uart1RxTempData,
+	.dataLength = UART1_RX_LENGTH,
+	.uart = &huart1
+};
+UARTInfo_t uart2Info = {
+	.dataAddr = uart2RxTempData,
+	.dataLength = UART2_RX_LENGTH,
+	.uart = &huart2
+};
+UARTInfo_t uart3Info = {
+	.dataAddr = uart3RxTempData,
+	.dataLength = UART3_RX_LENGTH,
+	.uart = &huart3
+};
+UARTInfo_t uart4Info = {
+	.dataAddr = uart4RxTempData,
+	.dataLength = UART4_RX_LENGTH,
+	.uart = &huart4
+};
+UARTInfo_t uart5Info = {
+	.dataAddr = uart5RxTempData,
+	.dataLength = UART5_RX_LENGTH,
+	.uart = &huart5
+};
+
+QueueHandle_t uartQueueHandle;
 
 #if !defined(__MICROLIB)
 
@@ -175,7 +217,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     hdma_uart4_rx.Init.MemInc = DMA_MINC_ENABLE;
     hdma_uart4_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
     hdma_uart4_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_uart4_rx.Init.Mode = DMA_NORMAL;
+    hdma_uart4_rx.Init.Mode = DMA_CIRCULAR;
     hdma_uart4_rx.Init.Priority = DMA_PRIORITY_LOW;
     hdma_uart4_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
     if (HAL_DMA_Init(&hdma_uart4_rx) != HAL_OK)
@@ -241,7 +283,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     hdma_uart5_rx.Init.MemInc = DMA_MINC_ENABLE;
     hdma_uart5_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
     hdma_uart5_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_uart5_rx.Init.Mode = DMA_NORMAL;
+    hdma_uart5_rx.Init.Mode = DMA_CIRCULAR;
     hdma_uart5_rx.Init.Priority = DMA_PRIORITY_LOW;
     hdma_uart5_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
     if (HAL_DMA_Init(&hdma_uart5_rx) != HAL_OK)
@@ -307,7 +349,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     hdma_usart1_rx.Init.MemInc = DMA_MINC_ENABLE;
     hdma_usart1_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
     hdma_usart1_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_usart1_rx.Init.Mode = DMA_NORMAL;
+    hdma_usart1_rx.Init.Mode = DMA_CIRCULAR;
     hdma_usart1_rx.Init.Priority = DMA_PRIORITY_LOW;
     hdma_usart1_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
     if (HAL_DMA_Init(&hdma_usart1_rx) != HAL_OK)
@@ -373,7 +415,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     hdma_usart2_rx.Init.MemInc = DMA_MINC_ENABLE;
     hdma_usart2_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
     hdma_usart2_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_usart2_rx.Init.Mode = DMA_NORMAL;
+    hdma_usart2_rx.Init.Mode = DMA_CIRCULAR;
     hdma_usart2_rx.Init.Priority = DMA_PRIORITY_LOW;
     hdma_usart2_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
     if (HAL_DMA_Init(&hdma_usart2_rx) != HAL_OK)
@@ -439,7 +481,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     hdma_usart3_rx.Init.MemInc = DMA_MINC_ENABLE;
     hdma_usart3_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
     hdma_usart3_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_usart3_rx.Init.Mode = DMA_NORMAL;
+    hdma_usart3_rx.Init.Mode = DMA_CIRCULAR;
     hdma_usart3_rx.Init.Priority = DMA_PRIORITY_LOW;
     hdma_usart3_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
     if (HAL_DMA_Init(&hdma_usart3_rx) != HAL_OK)
@@ -568,5 +610,77 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
     /* USART3 interrupt Deinit */
     HAL_NVIC_DisableIRQ(USART3_IRQn);
   }
+}
+
+inline void UART1_SendData(uint8_t *data,uint16_t length)
+{
+	HAL_UART_Transmit_DMA(&huart1,data,length);
+	xSemaphoreTake(uart1Semaphore,portMAX_DELAY);
+}
+inline void UART2_SendData(uint8_t *data,uint16_t length)
+{
+	HAL_UART_Transmit_DMA(&huart2,data,length);
+	xSemaphoreTake(uart2Semaphore,portMAX_DELAY);
+}
+inline void UART3_SendData(uint8_t *data,uint16_t length)
+{
+	HAL_UART_Transmit_DMA(&huart3,data,length);
+	xSemaphoreTake(uart3Semaphore,portMAX_DELAY);
+}
+inline void UART4_SendData(uint8_t *data,uint16_t length)
+{
+	HAL_UART_Transmit_DMA(&huart4,data,length);
+	xSemaphoreTake(uart4Semaphore,portMAX_DELAY);
+}
+inline void UART5_SendData(uint8_t *data,uint16_t length)
+{
+	HAL_UART_Transmit_DMA(&huart5,data,length);
+	xSemaphoreTake(uart5Semaphore,portMAX_DELAY);
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef* uartHandle)
+{
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+	if(uartHandle->Instance == USART1)
+	{
+		xSemaphoreGiveFromISR( uart1Semaphore, &xHigherPriorityTaskWoken );
+	}
+	if(uartHandle->Instance == USART2)
+	{
+		xSemaphoreGiveFromISR( uart2Semaphore, &xHigherPriorityTaskWoken );
+	}
+	if(uartHandle->Instance == USART3)
+	{
+		xSemaphoreGiveFromISR( uart3Semaphore, &xHigherPriorityTaskWoken );
+	}
+	if(uartHandle->Instance == UART4)
+	{
+		xSemaphoreGiveFromISR( uart4Semaphore, &xHigherPriorityTaskWoken );
+	}
+	if(uartHandle->Instance == UART5)
+	{
+		xSemaphoreGiveFromISR( uart5Semaphore, &xHigherPriorityTaskWoken );
+	}
+	portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+}
+
+void HAL_UART_RxCallback(UART_HandleTypeDef* uartHandle)
+{
+	if(__HAL_UART_GET_FLAG(uartHandle,UART_FLAG_IDLE) != RESET)
+	{
+		__HAL_UART_CLEAR_IDLEFLAG(uartHandle);
+		uartHandle->Instance->SR;
+		uartHandle->Instance->DR;
+		HAL_UART_DMAPause(uartHandle);
+		uint16_t surplusLength =  uartHandle->hdmarx->Instance->NDTR;
+		if(uartHandle->Instance == USART1)
+		{
+			uart1Info.lastIndex = uart1Info.index;
+			uart1Info.index = uart1Info.dataLength - surplusLength;
+			BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+			xQueueSendFromISR(uartQueueHandle,&uart1Info,&xHigherPriorityTaskWoken);
+			portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+		}
+	}
 }
 

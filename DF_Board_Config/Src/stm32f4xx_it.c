@@ -26,6 +26,7 @@ extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 extern TIM_HandleTypeDef htim6;
 
+extern void HAL_UART_RxCallback(UART_HandleTypeDef* uartHandle);
 
 /******************************************************************************/
 /*           Cortex-M4 Processor Interruption and Exception Handlers          */
@@ -220,9 +221,8 @@ void SPI1_IRQHandler(void)
   */
 void USART1_IRQHandler(void)
 {
-
   HAL_UART_IRQHandler(&huart1);
-
+  HAL_UART_RxCallback(&huart1);
 }
 
 /**
@@ -232,6 +232,7 @@ void USART2_IRQHandler(void)
 {
 
   HAL_UART_IRQHandler(&huart2);
+	HAL_UART_RxCallback(&huart2);
 
 }
 
@@ -242,6 +243,7 @@ void USART3_IRQHandler(void)
 {
 
   HAL_UART_IRQHandler(&huart3);
+	HAL_UART_RxCallback(&huart3);
 
 }
 
@@ -262,6 +264,7 @@ void UART4_IRQHandler(void)
 {
 
   HAL_UART_IRQHandler(&huart4);
+	HAL_UART_RxCallback(&huart4);
 
 }
 
@@ -272,6 +275,7 @@ void UART5_IRQHandler(void)
 {
 
   HAL_UART_IRQHandler(&huart5);
+	HAL_UART_RxCallback(&huart5);
 
 }
 
