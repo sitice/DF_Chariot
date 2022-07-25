@@ -10,7 +10,7 @@
 #define RAWDATA_TO_ANGLE	0.0610351f
 #define RAWDATA_TO_RADIAN	0.0010653f
 
-EulerAngle_t IMUupdate(ICM20602::Acc_t &acc,ICM20602::Gyro_t &gyro) 
+EulerAngle_t IMUupdate(ICM20602::Acc_t &acc,ICM20602::Gyro_t &gyro,ICM20602::Gyro_t &filter_gyro) 
 { 
 	float norm = 0;
 	float ex = 0, ey = 0, ez = 0;
@@ -77,13 +77,7 @@ EulerAngle_t IMUupdate(ICM20602::Acc_t &acc,ICM20602::Gyro_t &gyro)
 //	nacc.y=rMat[1][0] * aex+rMat[1][1] * aey+rMat[1][2] * aez;
 //	nacc.z=rMat[2][0] * aex+rMat[2][1] * aey+rMat[2][2] * aez;
 	
-	EulerAngle_t angle;
-	ICM20602::Gyro_t filter_gyro{
-		.x = 0,
-		.y = 0,
-		.z = 0
-	}; 
-	IIRFilter(gyro,filter_gyro);
+	static EulerAngle_t angle;
 	//模拟继电器死区特性（不含滞回特性）
 	if(filter_gyro.z > 3||filter_gyro.z < -3 )
 		angle.yaw -= (filter_gyro.z  *  RAWDATA_TO_ANGLE  *  0.001f);

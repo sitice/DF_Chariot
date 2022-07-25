@@ -185,6 +185,6 @@ void SPI_SetSpeed(SPI_HandleTypeDef* spiHandle , uint8_t SPI_BaudRatePrescaler)
 uint8_t SPI_Write_Read_Byte(SPI_HandleTypeDef* spiHandle , uint8_t data)
 {
 	uint8_t rec_data;
-	HAL_SPI_TransmitReceive(spiHandle,&data,&rec_data,1,0xff);
+	HAL_SPI_TransmitReceive(spiHandle,&data,&rec_data,1,0xffff);
 	return rec_data;
 }

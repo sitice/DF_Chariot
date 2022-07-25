@@ -26,7 +26,7 @@
 
 
 
-ICM20602 icm20602(&hspi1,GPIOD,GPIO_PIN_0);
+ICM20602 icm20602(&hspi2,GPIOA,GPIO_PIN_8);
 OLED oled;
 AK8975 ak8975(&hspi1,GPIOA,GPIO_PIN_4);
 SPL06 spl06(&hspi2,GPIOD,GPIO_PIN_3);//这个用的是spi1吧
@@ -105,8 +105,8 @@ void defaultTask(void *param)
 		SPI1Init();
 		SPI2Init();
 		//开了下面的任务数据无法接收
-		//xTaskCreate( GetDataTask ,"GetDataTask",128,NULL,4,NULL);
-        //xTaskCreate( DebugTask ,"DebugTask",128,NULL,3,NULL);
+		xTaskCreate( GetDataTask ,"GetDataTask",128,NULL,4,NULL);
+        xTaskCreate( DebugTask ,"DebugTask",128,NULL,3,NULL);
 		//xTaskCreate( OLEDTask ,"OLEDTask",128,NULL,4,NULL);
 		xTaskCreate( UARTDataHandelTask ,"UARTDataHandelTask",256,NULL,5,NULL);
 //		xTaskCreate( MotorTask ,"MotorTask",128,NULL,4,NULL);
@@ -119,19 +119,25 @@ static void GetDataTask(void *param)
 {
 	
 	icm20602.Init();
-	ak8975.Init();
-	spl06.Init();
+//	ak8975.Init();
+//	spl06.Init();
     TickType_t lastTick = xTaskGetTickCount();
     TickType_t period = 1 / portTICK_RATE_MS; //1ms 
 	icm20602.CalibrationAll();//校准打开
 	for(;;)
 	{
-		AK8975::Mag_t mag = ak8975.GetMagVal();
-		SPL06::Baro_t baro = spl06.Updata();
+//		AK8975::Mag_t mag = ak8975.GetMagVal();
+//		SPL06::Baro_t baro = spl06.Updata();
 		icm20602.Updata();
 		ICM20602::Acc_t acc = icm20602.GetAccVal();
 		ICM20602::Gyro_t gyro = icm20602.GetRadian();
-		EulerAngle_t angle = IMUupdate(acc,gyro);
+		ICM20602::Gyro_t filter_gyro{
+		.x = 0,
+		.y = 0,
+		.z = 0
+		}; 
+		IIRFilter(icm20602.GetGyroVal(),filter_gyro);
+		angle = IMUupdate(acc,gyro,filter_gyro);
 		vTaskDelayUntil(&lastTick,period); //绝对延时，执行固定频率的任务
 	}
 }
@@ -140,8 +146,8 @@ static void DebugTask(void *param)
 {
     for(;;)
     {
-		vTaskDelay(300);
-        // sendSenser(angle.roll*100, angle.pitch*100, angle.yaw*100 , 1); 
+		vTaskDelay(10);
+        sendSenser(angle.roll*100, angle.pitch*100, angle.yaw*100 , 1);  
 		//函数内部改一下，不要一个一个数据发送。用“UART1_SendData(data,len)”函数发送整体数据
                 
                 

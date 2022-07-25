@@ -13,7 +13,7 @@ struct EulerAngle_t
 };
 
 
-EulerAngle_t IMUupdate(ICM20602::Acc_t &acc,ICM20602::Gyro_t &gyro); 
+EulerAngle_t IMUupdate(ICM20602::Acc_t &acc,ICM20602::Gyro_t &gyro,ICM20602::Gyro_t &filter_gyro); 
 float invSqrt(float x);// 快速计算开根号的倒数
 #endif
 

@@ -39,10 +39,7 @@ void sendSenser(s16 a_x, s16 a_y, s16 a_z, u8 _fu)
     DataTOSend[_cnt++] = sc;
     DataTOSend[_cnt++] = ac;
 
-    for (u8 temp = 0; temp < _cnt; temp++)
-    {
-        PrintHexU8(DataTOSend[temp]);
-    }
+	UART1_SendData(DataTOSend,_cnt);
 }
 
 //加速度角速度计
