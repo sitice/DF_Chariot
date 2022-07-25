@@ -4,7 +4,7 @@
 	此文件包含底盘运动控制函数以及底盘信息获取函数
 	
 */
-MOVE Move; //函数的信息最好写头文件内
+Move_t Move; //函数的信息最好写头文件内
 /**
   * @brief 底盘全向移动
 	* @note  电机面向轴顺时针旋转时为正方向,底盘顺时针旋转为正方向
@@ -42,7 +42,7 @@ void OmnibearingMove(uint16_t x,uint16_t y,uint16_t z)
   */
 void GetDistance(void)
 {
-	Move.Distance.X = -((Move.motor4->EncoderCntSum-Move.motor2->EncoderCntSum)-(Move.motor1->EncoderCntSum-Move.motor3->EncoderCntSum))*0.707106781f*0.023419f;
-	Move.Distance.Y = ((Move.motor4->EncoderCntSum-Move.motor2->EncoderCntSum)+(Move.motor1->EncoderCntSum-Move.motor3->EncoderCntSum))*0.707106781f*0.023419f;
+	Move.Distance.x = -((Move.motor4->EncoderCntSum-Move.motor2->EncoderCntSum)-(Move.motor1->EncoderCntSum-Move.motor3->EncoderCntSum))*0.707106781f*0.023419f;
+	Move.Distance.y = ((Move.motor4->EncoderCntSum-Move.motor2->EncoderCntSum)+(Move.motor1->EncoderCntSum-Move.motor3->EncoderCntSum))*0.707106781f*0.023419f;
 }
 

@@ -56,6 +56,10 @@
 //#define vAssertCalled(char,int) printf("Error:%s,%d\r\n",char,int)
 //#define configASSERT(x) if((x)==0) vAssertCalled(__FILE__,__LINE__)
 
+extern volatile uint64_t sys_time;
+#define portGET_RUN_TIME_COUNTER_VALUE() sys_time
+#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() 	
+
 #define configUSE_PREEMPTION			1  					//1使用抢占式内核，0使用协程
 #define configUSE_IDLE_HOOK				0
 #define configUSE_TICK_HOOK				0
@@ -87,7 +91,7 @@
 #define configUSE_MALLOC_FAILED_HOOK	0	//1使用内存申请失败钩子函数
 #define configUSE_APPLICATION_TASK_TAG	0
 #define configUSE_COUNTING_SEMAPHORES	1   //为1时使用计数信号量
-#define configGENERATE_RUN_TIME_STATS	0    //为1时启用运行时间统计功能
+#define configGENERATE_RUN_TIME_STATS	1   //为1时启用运行时间统计功能
 
 #define configSUPPORT_DYNAMIC_ALLOCATION 1 //支持动态分配内存
 

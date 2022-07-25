@@ -95,11 +95,11 @@ typedef struct{
 	uint16_t lastIndex;
 }UARTInfo_t;
 
-inline void UART1_SendData(uint8_t *data,uint16_t length);
-inline void UART2_SendData(uint8_t *data,uint16_t length);
-inline void UART3_SendData(uint8_t *data,uint16_t length);
-inline void UART4_SendData(uint8_t *data,uint16_t length);
-inline void UART5_SendData(uint8_t *data,uint16_t length);
+ void UART1_SendData(uint8_t *data,uint16_t length);
+ void UART2_SendData(uint8_t *data,uint16_t length);
+ void UART3_SendData(uint8_t *data,uint16_t length);
+ void UART4_SendData(uint8_t *data,uint16_t length);
+ void UART5_SendData(uint8_t *data,uint16_t length);
 
 void UART4Init(void);
 void UART5Init(void);

@@ -246,7 +246,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     __HAL_LINKDMA(uartHandle,hdmatx,hdma_uart4_tx);
 
     /* UART4 interrupt Init */
-    HAL_NVIC_SetPriority(UART4_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(UART4_IRQn, 6, 1);
     HAL_NVIC_EnableIRQ(UART4_IRQn);
   }
   else if(uartHandle->Instance==UART5)
@@ -312,7 +312,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     __HAL_LINKDMA(uartHandle,hdmatx,hdma_uart5_tx);
 	
 	/* UART4 interrupt Init */
-    HAL_NVIC_SetPriority(UART5_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(UART5_IRQn, 6, 1);
     HAL_NVIC_EnableIRQ(UART5_IRQn);
   }
   else if(uartHandle->Instance==USART1)
@@ -378,7 +378,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     __HAL_LINKDMA(uartHandle,hdmatx,hdma_usart1_tx);
 
     /* USART1 interrupt Init */
-    HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(USART1_IRQn, 6, 1);
     HAL_NVIC_EnableIRQ(USART1_IRQn);
   }
   else if(uartHandle->Instance==USART2)
@@ -444,7 +444,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     __HAL_LINKDMA(uartHandle,hdmatx,hdma_usart2_tx);
 
     /* USART2 interrupt Init */
-    HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(USART2_IRQn, 6, 1);
     HAL_NVIC_EnableIRQ(USART2_IRQn);
   }
   else if(uartHandle->Instance==USART3)
@@ -510,7 +510,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     __HAL_LINKDMA(uartHandle,hdmatx,hdma_usart3_tx);
 
     /* USART3 interrupt Init */
-    HAL_NVIC_SetPriority(USART3_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(USART3_IRQn, 6, 1);
     HAL_NVIC_EnableIRQ(USART3_IRQn);
   }
 }
@@ -612,27 +612,27 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
   }
 }
 
-inline void UART1_SendData(uint8_t *data,uint16_t length)
+ void UART1_SendData(uint8_t *data,uint16_t length)
 {
 	HAL_UART_Transmit_DMA(&huart1,data,length);
 	xSemaphoreTake(uart1Semaphore,portMAX_DELAY);
 }
-inline void UART2_SendData(uint8_t *data,uint16_t length)
+ void UART2_SendData(uint8_t *data,uint16_t length)
 {
 	HAL_UART_Transmit_DMA(&huart2,data,length);
 	xSemaphoreTake(uart2Semaphore,portMAX_DELAY);
 }
-inline void UART3_SendData(uint8_t *data,uint16_t length)
+ void UART3_SendData(uint8_t *data,uint16_t length)
 {
 	HAL_UART_Transmit_DMA(&huart3,data,length);
 	xSemaphoreTake(uart3Semaphore,portMAX_DELAY);
 }
-inline void UART4_SendData(uint8_t *data,uint16_t length)
+ void UART4_SendData(uint8_t *data,uint16_t length)
 {
 	HAL_UART_Transmit_DMA(&huart4,data,length);
 	xSemaphoreTake(uart4Semaphore,portMAX_DELAY);
 }
-inline void UART5_SendData(uint8_t *data,uint16_t length)
+ void UART5_SendData(uint8_t *data,uint16_t length)
 {
 	HAL_UART_Transmit_DMA(&huart5,data,length);
 	xSemaphoreTake(uart5Semaphore,portMAX_DELAY);
@@ -672,15 +672,47 @@ void HAL_UART_RxCallback(UART_HandleTypeDef* uartHandle)
 		uartHandle->Instance->SR;
 		uartHandle->Instance->DR;
 		HAL_UART_DMAPause(uartHandle);
-		uint16_t surplusLength =  uartHandle->hdmarx->Instance->NDTR;
 		if(uartHandle->Instance == USART1)
 		{
 			uart1Info.lastIndex = uart1Info.index;
-			uart1Info.index = uart1Info.dataLength - surplusLength;
+			uart1Info.index = uart1Info.dataLength - uartHandle->hdmarx->Instance->NDTR;
 			BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 			xQueueSendFromISR(uartQueueHandle,&uart1Info,&xHigherPriorityTaskWoken);
 			portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 		}
+		else if(uartHandle->Instance == USART2)
+		{
+			uart2Info.lastIndex = uart2Info.index;
+			uart2Info.index = uart2Info.dataLength - uartHandle->hdmarx->Instance->NDTR;
+			BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+			xQueueSendFromISR(uartQueueHandle,&uart2Info,&xHigherPriorityTaskWoken);
+			portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+		}
+		else if(uartHandle->Instance == USART3)
+		{
+			uart3Info.lastIndex = uart3Info.index;
+			uart3Info.index = uart3Info.dataLength - uartHandle->hdmarx->Instance->NDTR;
+			BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+			xQueueSendFromISR(uartQueueHandle,&uart3Info,&xHigherPriorityTaskWoken);
+			portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+		}
+		else if(uartHandle->Instance == UART4)
+		{
+			uart4Info.lastIndex = uart4Info.index;
+			uart4Info.index = uart4Info.dataLength - uartHandle->hdmarx->Instance->NDTR;
+			BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+			xQueueSendFromISR(uartQueueHandle,&uart4Info,&xHigherPriorityTaskWoken);
+			portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+		}
+		else if(uartHandle->Instance == UART5)
+		{
+			uart5Info.lastIndex = uart5Info.index;
+			uart5Info.index = uart5Info.dataLength - uartHandle->hdmarx->Instance->NDTR;
+			BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+			xQueueSendFromISR(uartQueueHandle,&uart5Info,&xHigherPriorityTaskWoken);
+			portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+		}
+		HAL_UART_DMAResume(uartHandle);
 	}
 }
 

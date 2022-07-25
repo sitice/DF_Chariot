@@ -454,26 +454,6 @@ void OLED::Init(void)
 	uint16_t pins[]{CS_Pin,DC_Pin,RES_Pin,D1_Pin,SCK_Pin};
 	for(size_t i = 0 ; i < 5 ; i++)
 	{
-		if(GPIOs[i] == GPIOA)
-		{
-			__HAL_RCC_GPIOA_CLK_ENABLE();
-		}
-		else if(GPIOs[i] == GPIOB)
-		{
-			__HAL_RCC_GPIOB_CLK_ENABLE();
-		}
-		else if(GPIOs[i] == GPIOC)
-		{
-			__HAL_RCC_GPIOC_CLK_ENABLE();
-		}
-		else if(GPIOs[i] == GPIOD)
-		{
-			__HAL_RCC_GPIOD_CLK_ENABLE();
-		}
-		else if(GPIOs[i] == GPIOE)
-		{
-			__HAL_RCC_GPIOE_CLK_ENABLE();
-		}
 		GPIO_InitTypeDef GPIO_InitStruct = {0};
 		GPIO_InitStruct.Pin = pins[i];
 		GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;

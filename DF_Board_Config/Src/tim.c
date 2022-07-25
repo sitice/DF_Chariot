@@ -1,7 +1,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "tim.h"
 
-static volatile uint64_t sys_time;
+volatile uint64_t sys_time;
 
 TIM_HandleTypeDef htim6;
 
@@ -14,7 +14,7 @@ void TIM6Init(void)
   htim6.Instance = TIM6;
   htim6.Init.Prescaler = 83;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = 999;
+  htim6.Init.Period = 49;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
   {
@@ -66,7 +66,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* tim_Handle)
 	}
 }
 
-uint64_t GetSysTime()
+volatile uint64_t GetSysTime()
 {
 	return sys_time;
 }

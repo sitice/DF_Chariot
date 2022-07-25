@@ -16,11 +16,11 @@ struct Move_t
 	{
 		float x;
 		float y;
-	}Distance_t;
+	}Distance;
 	
 };
 
-extern MOVE Move;
+extern Move_t Move;
 
 void OmnibearingMove(uint16_t x,uint16_t y,uint16_t z);
 #endif

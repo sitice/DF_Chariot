@@ -16,7 +16,7 @@ void TIM6Init(void);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
-uint64_t GetSysTime(void);
+volatile uint64_t GetSysTime(void);
 #ifdef __cplusplus
 }
 #endif

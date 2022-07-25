@@ -24,6 +24,8 @@
 #include "DF_Communicate.hpp"
 #include <cstring>
 
+
+
 ICM20602 icm20602(&hspi1,GPIOD,GPIO_PIN_0);
 OLED oled;
 AK8975 ak8975(&hspi1,GPIOA,GPIO_PIN_4);
@@ -79,7 +81,7 @@ void defaultTask(void *param)
 		HAL_UART_Receive_DMA(uart5Info.uart, uart5Info.dataAddr, uart5Info.dataLength);  // 启动DMA接收
 		__HAL_UART_ENABLE_IT(uart5Info.uart, UART_IT_IDLE);              // 使能空闲中断
 		TIM6Init();
-		HAL_TIM_Base_Start_IT(&htim6);
+		HAL_TIM_Base_Start_IT(&htim6); 
 		__HAL_RCC_GPIOC_CLK_ENABLE();
 		__HAL_RCC_GPIOH_CLK_ENABLE();
 		__HAL_RCC_GPIOB_CLK_ENABLE();
@@ -99,12 +101,14 @@ void defaultTask(void *param)
 		vSemaphoreCreateBinary(uart3Semaphore);
 		vSemaphoreCreateBinary(uart4Semaphore);
 		vSemaphoreCreateBinary(uart5Semaphore);
+		uartQueueHandle = xQueueCreate( 10 , sizeof(UARTInfo_t));
 		SPI1Init();
 		SPI2Init();
-		xTaskCreate( GetDataTask ,"GetDataTask",128,NULL,4,NULL);
-        xTaskCreate( DebugTask ,"DebugTask",128,NULL,3,NULL);
-		xTaskCreate( OLEDTask ,"OLEDTask",128,NULL,4,NULL);
-		xTaskCreate( UARTDataHandelTask ,"UARTDataHandelTask",128,NULL,4,NULL);
+		//开了下面的任务数据无法接收
+		//xTaskCreate( GetDataTask ,"GetDataTask",128,NULL,4,NULL);
+        //xTaskCreate( DebugTask ,"DebugTask",128,NULL,3,NULL);
+		//xTaskCreate( OLEDTask ,"OLEDTask",128,NULL,4,NULL);
+		xTaskCreate( UARTDataHandelTask ,"UARTDataHandelTask",256,NULL,5,NULL);
 //		xTaskCreate( MotorTask ,"MotorTask",128,NULL,4,NULL);
 		vTaskDelete(NULL);
 	}
@@ -136,11 +140,12 @@ static void DebugTask(void *param)
 {
     for(;;)
     {
-         sendSenser(angle.roll*100, angle.pitch*100, angle.yaw*100 , 1); 
+		vTaskDelay(300);
+        // sendSenser(angle.roll*100, angle.pitch*100, angle.yaw*100 , 1); 
 		//函数内部改一下，不要一个一个数据发送。用“UART1_SendData(data,len)”函数发送整体数据
                 
                 
-        //		printf("%f  ",(float)(gyro.x*RawData_to_Radian));
+        //		printf("%f  ",(float)(1));
         //		printf("%f  ",filter_gyro.x);
         //		printf("%f  ",filter_gyro.y);
         //		printf("%f  ",filter_gyro.z);
@@ -238,13 +243,13 @@ static void MotorTask(void *param)
 //此任务不要使用任何阻塞程序的代码，否则影响接收效率。如果发现数据丢失现象，加大对应串口数据缓冲区的大小
 static void UARTDataHandelTask(void *param)
 {
-	uartQueueHandle = xQueueCreate( 10 , sizeof(UARTInfo_t));
 	UARTInfo_t uartInfo;
+	uint8_t data[128];//获取的数据
+	uint16_t len;
 	for(;;)
 	{
 		xQueueReceive(uartQueueHandle,&uartInfo,portMAX_DELAY);
 		bool isOverFlow = uartInfo.lastIndex > uartInfo.index;
-		uint16_t len;
 		if(isOverFlow)
 		{
 			len = uartInfo.dataLength - uartInfo.lastIndex + uartInfo.index ;
@@ -253,7 +258,6 @@ static void UARTDataHandelTask(void *param)
 		{
 			len = uartInfo.index - uartInfo.lastIndex;
 		}
-		u8 data[len];//获取的数据
 		if(isOverFlow)
 		{
 			memcpy(data,uartInfo.dataAddr + uartInfo.lastIndex,uartInfo.dataLength - uartInfo.lastIndex);
@@ -265,8 +269,8 @@ static void UARTDataHandelTask(void *param)
 		}
 		if(uartInfo.uart == &huart1)
 		{
-			//所以串口发送都在任务内进行，此函数禁止在中断中使用
 			UART1_SendData(data,len);
+			//所以串口发送都在任务内进行，此函数禁止在中断中使用
 		}
 		else if(uartInfo.uart == &huart2)
 		{
@@ -284,5 +288,14 @@ static void UARTDataHandelTask(void *param)
 		{
 			UART5_SendData(data,len);
 		}
+	}
+}
+
+
+void ProtocolSendTask(void *task)
+{
+	for(;;)
+	{
+		
 	}
 }

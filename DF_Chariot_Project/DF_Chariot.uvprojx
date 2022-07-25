@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>..\HAL_Lib\CMSIS\Include;..\HAL_Lib\STM32F4xx_HAL_Driver\Inc;..\DF_Board_Config\Inc;..\DF_Chariot_Project;..\DF_Control\Inc;..\DF_Data_Deal\Inc;..\DF_Hardware_Driver\Inc;..\FreeRTOS\include;..\FreeRTOS\portable\RVDS\ARM_CM4F;..\HAL_Lib\CMSIS\Device\ST\STM32F4xx\Include;..\u8g2\csrc</IncludePath>
+              <IncludePath>..\HAL_Lib\CMSIS\Include;..\HAL_Lib\STM32F4xx_HAL_Driver\Inc;..\DF_Board_Config\Inc;..\DF_Chariot_Project;..\DF_Control\Inc;..\DF_Data_Deal\Inc;..\DF_Hardware_Driver\Inc;..\FreeRTOS\include;..\FreeRTOS\portable\RVDS\ARM_CM4F;..\HAL_Lib\CMSIS\Device\ST\STM32F4xx\Include;..\u8g2\csrc;..\DF_Protocol\Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1323,6 +1323,16 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>Protocol</GroupName>
+          <Files>
+            <File>
+              <FileName>DF_Protocol.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\DF_Protocol\Src\DF_Protocol.cpp</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>::CMSIS</GroupName>
         </Group>
       </Groups>
@@ -1341,5 +1351,14 @@
     </components>
     <files/>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>DF_Chariot</LayName>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>
